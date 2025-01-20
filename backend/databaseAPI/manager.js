@@ -2,7 +2,7 @@
 import { MongoClient, ServerApiVersion } from 'mongodb';
 
 const USER = "root"
-const PASSWORD = "jBsSDLrf3WrUWZU9"
+const PASSWORD = "vDJvsrWzKTyhypvD"
 const DB_NAME = "tradeGlobaX"
 const uri = "mongodb+srv://"+USER+":"+PASSWORD+"@cluster0.mpisr9t.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
