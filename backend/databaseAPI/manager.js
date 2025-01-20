@@ -95,35 +95,80 @@ export async function insertCoin(db, coinMetadata){
 }
 
 
-
-
 export async function insertPriceInstance(db, coinPriceInstance){
   // Replace with your collection name
   const collection = db.collection('coin');
+  const symbol = coinPriceInstance.symbol
+  delete coinPriceInstance.symbol
 
+  //check if coin exists
+  const existingCoin = await collection.findOne({ symbol: symbol });
+  if (!existingCoin) {
+      console.log(`Coin with symbol ${symbol} does not exist.`);
+      throw new Error(`Coin with symbol ${symbol} does not exist.`);
+  }
+
+  // Create a date object for the current price instance's timestamp
+  const date = new Date(coinPriceInstance.timestamp);
+  const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+  const dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1).getTime();
+  
   const existingTimestamp = await collection.findOne({
-    symbol: coinPriceInstance.symbol, // Ensure you are looking for the correct coin
+    symbol: symbol, // Ensure you are looking for the correct coin
     'priceInstances.timestamp': coinPriceInstance.timestamp // Use dot notation without spaces
   });
-
   if (existingTimestamp){
-    console.log(`Price instance with timestamp ${coinPriceInstance.timestamp} already exists for coin ${coinPriceInstance.symbol}.`);
-    throw new Error(`Price instance with timestamp ${coinPriceInstance.timestamp} already exists for coin ${coinPriceInstance.symbol}.`);
+    console.log(`Price instance with timestamp ${coinPriceInstance.timestamp} already exists for coin ${symbol}.`);
+    throw new Error(`Price instance with timestamp ${coinPriceInstance.timestamp} already exists for coin ${symbol}.`);
   }
 
-  // Update the coin document by pushing a new price entry
+  // Check for today's priceInstances
+  const existingDailyInstances = await collection.find({
+    symbol: symbol,
+    'priceInstances.timestamp': {
+      $gte: dayStart,
+      $lt: dayEnd
+    }
+  }).project({ priceInstances: 1 }).toArray();
+
+  let updateData = {
+    $push: { priceInstances: coinPriceInstance }
+  };
+
+  if (existingDailyInstances.length === 0) {
+    updateData.$set = {
+      dailyMax: coinPriceInstance.price,
+      dailyMin: coinPriceInstance.price
+    };
+  }else{
+    // Flatten the price instances array
+    const priceInstances = existingDailyInstances[0].priceInstances;
+    priceInstances.push(coinPriceInstance)
+
+    // Calculate new daily metrics
+    const dailyMax = Math.max(...priceInstances.map(instance => instance.price));
+    const dailyMin = Math.min(...priceInstances.map(instance => instance.price));
+
+    updateData.$set = {
+      dailyMax: dailyMax,
+      dailyMin: dailyMin
+    };
+  }
+
+  // Update the coin document
   const result = await collection.updateOne(
-    { symbol: coinPriceInstance.symbol }, // Find the coin by symbol
-    { $push: { priceInstances: coinPriceInstance } } // Push new price data into priceInstances array
+    { symbol: symbol },
+    updateData
   );
 
-
   if (result.modifiedCount === 0) {
-      throw new Error(`Coin with symbol ${ coinPriceInstance.symbol} not found.`);
+      throw new Error(`Coin with symbol ${ symbol} not found.`);
   }
 
-  console.log(`priceInstance data inserted into coin with symbol ${ coinPriceInstance.symbol}.`);
+  console.log(`priceInstance data inserted into coin with symbol ${ symbol}.`);
 }
+
+
 
 
 

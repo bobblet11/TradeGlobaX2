@@ -9,26 +9,51 @@ const app = express();
 const port = 3000;
 
 const COIN_META_DATA_SCHEMA = Joi.object({
-	name: Joi.string().min(1).required(),
-	symbol: Joi.string().min(1).uppercase().required(),
-	image: Joi.binary().required(), // Use binary for BSON
-});
+	name: Joi.string()
+	    .min(1)
+	    .required(),
+	symbol: Joi.string()
+	    .uppercase()
+	    .min(1)
+	    .required(),
+	description: Joi.string()
+	    .required(),
+	logo: Joi.string()
+	    .uri()
+	    .required()
+    });
 
 const COIN_PRICE_INSTANCE_SCHEMA = Joi.object({
-	symbol: Joi.string().min(1).uppercase().required(),
-	timestamp: Joi.date().iso().required(),
-	price: Joi.number().required(), // Current price of the coin
-	marketCap: Joi.number().optional(), // Market capitalization
-	volume24: Joi.number().optional(), // Trading volume in the last 24 hours
-	circulatingSupply: Joi.number().optional(), // Opening price for the current period
-	totalSupply: Joi.number().optional(), // Closing price for the current period
-	
-	//idk maybe store this outside of priceInstance and update it whenever it changes
-	open24: Joi.number().optional(), // Opening price for the current period
-	close24: Joi.number().optional(), // Closing price for the current period
-	high24: Joi.number().optional(), // Highest price in the last 24 hours
-	low24: Joi.number().optional(), // Lowest price in the last 24 hours
-    });
+	symbol: Joi.string()
+	    .required(),
+	timestamp: Joi.date()
+	    .required(),
+	price: Joi.number()
+	    .greater(0)
+	    .required(),
+	market_cap: Joi.number()
+	    .greater(0)
+	    .required(),
+	volume_change_24h: Joi.number()
+	    .required(),
+	circulating_supply: Joi.number()
+	    .greater(0)
+	    .required(),
+	total_supply: Joi.number()
+	    .greater(0)
+	    .required(),
+	fully_diluted_market_cap: Joi.number()
+	    .greater(0)
+	    .required(),
+	percent_change_1h: Joi.number()
+	    .required(),
+	percent_change_24h: Joi.number()
+	    .required(),
+	percent_change_7d: Joi.number()
+	    .required()
+});
+    
+
     
 
 // Middleware

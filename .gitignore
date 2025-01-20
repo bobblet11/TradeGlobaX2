@@ -1,1 +1,3 @@
 backend/databaseAPI/node_modules
+backend/webFetcher/node_modules
+backend/webScraper/node_modules
