@@ -1,7 +1,7 @@
 import fs from 'fs';
 
 const KEY = "717d6948-4684-488c-b7a1-2cca131df220"
-const COIN_IDS_TO_TRACK = readLineFromFile("./coins.txt", 1)
+const COIN_IDS_TO_TRACK = readLineFromFile("backend/webFetcher/coins.txt", 1)
 const port = process.env.PORT || 3000;
 
 // Function to read a specific line from a text file
