@@ -6,7 +6,7 @@ import Joi from 'joi';
 const db = await manager.connectDB()
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 const COIN_META_DATA_SCHEMA = Joi.object({
 	name: Joi.string()
