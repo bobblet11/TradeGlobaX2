@@ -20,6 +20,36 @@ function readLineFromFile(filePath, lineNumber) {
 	return lines[lineNumber - 1];
 }
 
+async function initDB(){
+	const initialCoins = await fetchInitData()
+	let numOfSuccess = 0
+	let numOfFail = 0
+	let numOFRequest = 0
+
+	for (const coin of initialCoins){
+		try{	
+			const stringify = JSON.stringify(coin)
+			const response = await fetch("http://localhost:3000/coin/metadata",
+			{ 
+				method: "POST",
+				headers: {
+					'Content-Type': 'application/json' // Set the content type
+				},
+				body: stringify
+			})	
+			if (!response.ok){
+				throw Error("failed Response " + response.body)
+			}
+			numOfSuccess+=1
+		}catch(error){
+			numOfFail+=1
+		}
+		numOFRequest+=1
+		console.clear()
+		console.log(`requests success ${numOfSuccess} fail ${numOfFail} out of ${numOFRequest} requests`)
+	}
+}
+
 async function fetchInitData(){
 	let currentTime = new Date().getTime();
 	let dataJson;
@@ -34,8 +64,7 @@ async function fetchInitData(){
 		})
 
 		dataJson = await data.json();
-		const coinMetaDataDTOs = generateCoinMetadataDTOs(dataJson["data"])
-		return coinMetaDataDTOs
+		return generateCoinMetadataDTOs(dataJson["data"])
 		
 	}
 	catch(error) {
@@ -76,8 +105,8 @@ async function fetchPriceInstanceData(){
 			headers: {"X-CMC_PRO_API_KEY": KEY,},
 		})
 		dataJson = await data.json();
-		const priceInstancesData = generatePriceInstanceDTOs(dataJson["data"])
-		return priceInstancesData
+		return generatePriceInstanceDTOs(dataJson["data"])
+
 	}
 	catch(error) {
 		console.log(error);
@@ -103,7 +132,7 @@ async function generatePriceInstanceDTOs(dataJson){
 				percent_change_7d: coin.quote.USD.percent_change_7d,	
 			}
 		})
-		console.log(priceInstances)
+
 		return priceInstances
 	}
 	catch (error){
@@ -112,8 +141,50 @@ async function generatePriceInstanceDTOs(dataJson){
 	}
 }
 
+const runAtStartOfHour = async () => {
+	let numOfSuccess = 0
+	let numOfFail = 0
+	let numOFRequest = 0
 
-await fetchPriceInstanceData()
+	console.log('Running task at the start of the hour:', new Date().toISOString());
+	const priceInstances = await fetchPriceInstanceData()
+	for (const priceInstance of priceInstances){
+		try{	
+			const stringify = JSON.stringify(priceInstance)
+			const response = await fetch("http://localhost:3000/coin/priceInstance",
+			{ 
+				method: "POST",
+				headers: {
+					'Content-Type': 'application/json' // Set the content type
+				},
+				body: stringify
+			})
+			if (!response.ok){
+				throw new Error(response.body)
+			}
+			numOfSuccess+=1
+		}catch(error){
+			console.log(error)
+			numOfFail+=1	
+		}
+		numOFRequest+=1
+		console.clear()
+		console.log(`INSERT at ${new Date().toISOString()}: requests success ${numOfSuccess} fail ${numOfFail} out of ${numOFRequest} requests`)
 
+	}
 
+};
+    
+// Function to check if it's the start of the hour
+const checkForStartOfHour = () => {
+	const now = new Date();
+	console.clear(); 
+	console.log(`Time is currently ${now}`)
+	if (now.getMinutes() === 0 && now.getSeconds() === 0) {
+		runAtStartOfHour();
+	}
+};
 
+await initDB()
+// // Check every second
+setInterval(checkForStartOfHour, 1000);

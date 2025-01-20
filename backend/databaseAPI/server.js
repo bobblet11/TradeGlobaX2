@@ -23,6 +23,7 @@ const COIN_META_DATA_SCHEMA = Joi.object({
 	    .required()
     });
 
+    
 const COIN_PRICE_INSTANCE_SCHEMA = Joi.object({
 	symbol: Joi.string()
 	    .required(),
@@ -103,6 +104,7 @@ app.post('/coin/metadata', async (req, res) => {
 		// Validate the request body against the schema
 		const { error } = COIN_META_DATA_SCHEMA.validate(req.body);
 		if (error) {
+			console.log(error.details[0].message)
 			return res.status(400).send({ message: error.details[0].message });
 		}
 		await manager.insertCoin(db, req.body)
@@ -116,8 +118,10 @@ app.post('/coin/metadata', async (req, res) => {
 app.post('/coin/priceInstance', async (req, res) => {
 	try {
 		// Validate the request body against the schema
+		console.log(req.body)
 		const { error } = COIN_PRICE_INSTANCE_SCHEMA.validate(req.body);
 		if (error) {
+			console.log(error.details[0].message)
 			return res.status(400).send({ message: error.details[0].message });
 		}
 
