@@ -2,6 +2,7 @@ import fs from 'fs';
 
 const KEY = "717d6948-4684-488c-b7a1-2cca131df220"
 const COIN_IDS_TO_TRACK = readLineFromFile("./coins.txt", 1)
+const port = process.env.PORT || 3000;
 
 // Function to read a specific line from a text file
 function readLineFromFile(filePath, lineNumber) {
@@ -29,7 +30,7 @@ async function initDB(){
 	for (const coin of initialCoins){
 		try{	
 			const stringify = JSON.stringify(coin)
-			const response = await fetch("http://localhost:3000/coin/metadata",
+			const response = await fetch("http://localhost:"+port+"/coin/metadata",
 			{ 
 				method: "POST",
 				headers: {
