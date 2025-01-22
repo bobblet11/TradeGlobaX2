@@ -1,11 +1,15 @@
-
-import { MongoClient, ServerApiVersion } from 'mongodb';
-
-const USER = "root"
-const PASSWORD = "vDJvsrWzKTyhypvD"
-const DB_NAME = "tradeGlobaX"
-const uri = "mongodb+srv://"+USER+":"+PASSWORD+"@cluster0.mpisr9t.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-
+import { MongoClient, ServerApiVersion } from "mongodb";
+import dotenv from "dotenv";
+dotenv.config();
+const USER = process.env.DB_USER;
+const PASSWORD = process.env.DB_PASSWORD;
+const DB_NAME = process.env.DB_NAME;
+const uri =
+  "mongodb+srv://" +
+  USER +
+  ":" +
+  PASSWORD +
+  "@cluster0.mpisr9t.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -13,163 +17,213 @@ const client = new MongoClient(uri, {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 });
 
+export async function connectDB() {
+  let db = null;
+  try {
+    await client.connect();
+    await client.db("admin").command({ ping: 1 });
+    console.log("Successfully connected to MongoDB!");
+    db = client.db(DB_NAME);
+    return db;
+  } catch (error) {
+    console.error("Database connection failed:", error.message);
+    throw new Error("Database connection failed");
+  }
+}
 
-export async function connectDB(){
-    let db = null
-    try {
-        await client.connect();
-        // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
-        console.log("Pinged your deployment. You successfully connected to MongoDB!");
-        db = client.db(DB_NAME);
-        console.log('Connected to ' + DB_NAME + ' db.');
-        return db
-    }catch(error){
-        console.log('Database connection failed:', err)
-        return db
+export async function getPriceInstance(db, symbol, count) {
+  // Replace with your collection name
+  const collection = db.collection("coin");
+
+  let n = parseInt(count, 10);
+
+  try {
+    const coin = await collection.findOne(
+      { symbol },
+      { projection: { priceInstances: { $slice: -n } } }
+    );
+
+    if (!coin || !coin.priceInstances || coin.priceInstances.length === 0) {
+      throw new Error("No price instances found for this coin.");
     }
+
+    return coin.priceInstances.reverse();
+  } catch (error) {
+    throw error; // Re-throw the error for handling in the calling function
+  }
 }
 
-export async function getPriceInstance(db, symbol, count){
-  // Replace with your collection name
-  const collection = db.collection('coin');
+export async function getPriceInstanceRange(db, symbol, startDate, endDate) {
 
-  let n = parseInt(count)
-  if (n === 1){
-    console.log(`Getting latest priceInstance`)
-  }else{
-    console.log(`Getting latest ${n} priceInstances`)
-  }
-  const coin = await collection.findOne(
-    { symbol: symbol }, // Assuming 'id' is the coin symbol
-    { projection: { priceInstances: { $slice: -n } } } // Get the last n price instances
-  );
+  try{
+    const collection = db.collection("coin");
+    const result = await collection
+      .aggregate([
+        { $match: { symbol: symbol } }, // Match the specific coin by symbol
+        {
+          $project: {
+            priceInstances: {
+              $filter: {
+                input: "$priceInstances",
+                as: "instance",
+                cond: {
+                  $and: [
+                    { $gte: ["$$instance.timestamp", startDate] },
+                    { $lte: ["$$instance.timestamp", endDate] }, // Use < for exclusive end
+                  ],
+                },
+              },
+            },
+          },
+        },
+      ])
+      .toArray();
 
-  if (!coin || !coin.priceInstances || coin.priceInstances.length === 0) {
-    throw new Error({message: "No price instances found for this coin."});
+    if (!result || result.length === 0 || result[0].priceInstances.length === 0) {
+      throw new Error("No price instances found for this coin within the specified date range.");
+    }
+    return result[0].priceInstances.reverse();
+  }catch(error){
+    throw error;
   }
-  
-  const latestPriceInstances = coin.priceInstances.reverse();
-  console.log(`found ${coin.priceInstances.length} priceInstances`)
-  return latestPriceInstances
 }
 
+export async function getCoinMetadata(db, symbol) {
+  const collection = db.collection("coin");
 
+  try {
+    const coin = await collection.findOne(
+      { symbol },
+      { projection: { priceInstances: 0 } }
+    );
 
-export async function getCoinMetadata(db, symbol){
-  // Replace with your collection name
-  const collection = db.collection('coin');
+    if (!coin) {
+      throw new Error("No coin found.");
+    }
 
-  const coin = await collection.findOne(
-    { symbol: symbol }, // Assuming 'symbol' is the coin symbol
-    { projection: { priceInstances: 0 } } // Exclude priceInstances from the result
-  );
-
-  if (!coin) {
-    throw new Error({message: "No coin found."});
+    return coin;
+  } catch (error) {
+    throw error;
   }
-  console.log(`coin found ${coin}`);
-  return coin
 }
-  
-  
 
+export async function insertCoin(db, coinMetadata) {
+  const collection = db.collection("coin");
 
-export async function insertCoin(db, coinMetadata){
-  // Replace with your collection name
-  const collection = db.collection('coin');
-
-  //check if coin exists
-  const existingCoin = await collection.findOne({ symbol: coinMetadata.symbol });
-  if (existingCoin) {
-      console.log(`Coin with symbol ${coinMetadata.symbol} already exists.`);
+  try {
+    const existingCoin = await collection.findOne({ symbol: coinMetadata.symbol });
+    if (existingCoin) {
       throw new Error(`Coin with symbol ${coinMetadata.symbol} already exists.`);
-  }
-
-  // Insert the document
-  const result = await collection.insertOne(coinMetadata);
-  console.log(`New document created with the following id: ${result.insertedId}`);
-}
-
-
-export async function insertPriceInstance(db, coinPriceInstance){
-  // Replace with your collection name
-  const collection = db.collection('coin');
-  const symbol = coinPriceInstance.symbol
-  delete coinPriceInstance.symbol
-
-  //check if coin exists
-  const existingCoin = await collection.findOne({ symbol: symbol });
-  if (!existingCoin) {
-      console.log(`Coin with symbol ${symbol} does not exist.`);
-      throw new Error(`Coin with symbol ${symbol} does not exist.`);
-  }
-
-  // Create a date object for the current price instance's timestamp
-  const date = new Date(coinPriceInstance.timestamp);
-  const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
-  const dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1).getTime();
-  
-  const existingTimestamp = await collection.findOne({
-    symbol: symbol, // Ensure you are looking for the correct coin
-    'priceInstances.timestamp': coinPriceInstance.timestamp // Use dot notation without spaces
-  });
-  if (existingTimestamp){
-    console.log(`Price instance with timestamp ${coinPriceInstance.timestamp} already exists for coin ${symbol}.`);
-    throw new Error(`Price instance with timestamp ${coinPriceInstance.timestamp} already exists for coin ${symbol}.`);
-  }
-
-  // Check for today's priceInstances
-  const existingDailyInstances = await collection.find({
-    symbol: symbol,
-    'priceInstances.timestamp': {
-      $gte: dayStart,
-      $lt: dayEnd
     }
-  }).project({ priceInstances: 1 }).toArray();
 
-  let updateData = {
-    $push: { priceInstances: coinPriceInstance }
-  };
-
-  if (existingDailyInstances.length === 0) {
-    updateData.$set = {
-      dailyMax: coinPriceInstance.price,
-      dailyMin: coinPriceInstance.price
-    };
-  }else{
-    // Flatten the price instances array
-    const priceInstances = existingDailyInstances[0].priceInstances;
-    priceInstances.push(coinPriceInstance)
-
-    // Calculate new daily metrics
-    const dailyMax = Math.max(...priceInstances.map(instance => instance.price));
-    const dailyMin = Math.min(...priceInstances.map(instance => instance.price));
-
-    updateData.$set = {
-      dailyMax: dailyMax,
-      dailyMin: dailyMin
-    };
+    const result = await collection.insertOne(coinMetadata);
+  } catch (error) {
+    throw error;
   }
-
-  // Update the coin document
-  const result = await collection.updateOne(
-    { symbol: symbol },
-    updateData
-  );
-
-  if (result.modifiedCount === 0) {
-      throw new Error(`Coin with symbol ${ symbol} not found.`);
-  }
-
-  console.log(`priceInstance data inserted into coin with symbol ${ symbol}.`);
 }
 
+export async function insertPriceInstance(db, coinPriceInstance) {
+  const collection = db.collection("coin");
+  const symbol = coinPriceInstance.symbol;
+  delete coinPriceInstance.symbol;
 
+  try {
+    const existingCoin = await collection.findOne({ symbol });
+    if (!existingCoin) {
+      throw new Error(`Coin with symbol ${symbol} does not exist.`);
+    }
 
+    const existingTimestamp = await collection.findOne({
+      symbol,
+      "priceInstances.timestamp": coinPriceInstance.timestamp,
+    });
 
+    if (existingTimestamp) {
+      throw new Error(`Price instance with timestamp ${coinPriceInstance.timestamp} already exists for coin ${symbol}.`);
+    }
 
+    const updateData = { $push: { priceInstances: coinPriceInstance }, $set: {} };
+    const today = new Date(coinPriceInstance.timestamp);
+    const dayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const dayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
 
+    const existingDailyInstances = await collection
+      .aggregate([
+        { $match: { symbol } },
+        {
+          $project: {
+            priceInstances: {
+              $filter: {
+                input: "$priceInstances",
+                as: "instance",
+                cond: {
+                  $and: [
+                    { $gte: ["$$instance.timestamp", dayStart] },
+                    { $lt: ["$$instance.timestamp", dayEnd] },
+                  ],
+                },
+              },
+            },
+          },
+        },
+        { $match: { "priceInstances.0": { $exists: true } } },
+      ])
+      .toArray();
+
+    if (existingDailyInstances.length > 0) {
+      const priceInstances = existingDailyInstances[0].priceInstances;
+      priceInstances.push(coinPriceInstance);
+      updateData.$set.dailyMax = Math.max(...priceInstances.map((instance) => instance.price));
+      updateData.$set.dailyMin = Math.min(...priceInstances.map((instance) => instance.price));
+    } else {
+      updateData.$set.dailyMax = coinPriceInstance.price;
+      updateData.$set.dailyMin = coinPriceInstance.price;
+    }
+
+    const result = await collection.updateOne({ symbol }, updateData);
+    if (result.modifiedCount === 0) {
+      throw new Error(`Coin with symbol ${symbol} not found.`);
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getAllCoinsWithLatestPriceInstance(db) {
+  const collection = db.collection("coin");
+
+  try {
+    const result = await collection
+      .aggregate([
+        {
+          $project: {
+            symbol: 1,
+            latestPriceInstance: {
+              $arrayElemAt: [
+                {
+                  $sortArray: {
+                    input: "$priceInstances",
+                    sortBy: { timestamp: -1 },
+                  },
+                },
+                0,
+              ],
+            },
+          },
+        },
+        { $match: { latestPriceInstance: { $exists: true } } },
+      ])
+      .toArray();
+
+    if (result.length === 0) {
+      throw new Error("No coins found with price instances.");
+    }
+
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}

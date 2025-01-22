@@ -2,11 +2,38 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import * as manager from './manager.js'; // Ensure to add .js extension
 import Joi from 'joi';
-
-const db = await manager.connectDB()
+import helmet from 'helmet';
+import morgan from 'morgan';
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+const COIN_META_DATA_GET_SCHEMA = Joi.object({
+	symbol: Joi.string()
+	    .uppercase()
+	    .min(1)
+	    .required()
+});
+
+const COIN_PRICE_INSTANCE_GET_SCHEMA = Joi.object({
+	symbol: Joi.string()
+	    .uppercase()
+	    .min(1)
+	    .required(),
+	numberOfInstances: Joi.number()
+	    .greater(0)
+});
+
+const COIN_PRICE_INSTANCE_RANGE_GET_SCHEMA = Joi.object({
+	symbol: Joi.string()
+	    .uppercase()
+	    .min(1)
+	    .required(),
+	startDate: Joi.date()
+	    .required(),
+	endDate: Joi.date()
+	    .required(),
+});
 
 const COIN_META_DATA_SCHEMA = Joi.object({
 	name: Joi.string()
@@ -59,112 +86,112 @@ const COIN_PRICE_INSTANCE_SCHEMA = Joi.object({
 
 // Middleware
 app.use(bodyParser.json());
+app.use(helmet());
+app.use(morgan('combined'));
+
 app.use((req, res, next) => {
 	console.log(`${req.method} ${req.url}`);
 	next(); // Call the next middleware or route handler
 });
 
 
-// Connect to the database and set it in app.locals
-(async () => {
-	try {
-	    const db = await manager.connectDB();
-	    app.locals.db = db; // Store the db in app.locals
-    
-	    // Start the server
-	    app.listen(port, () => {
-		console.log(`Server is running on http://localhost:${port}`);
-	    });
-	} catch (error) {
-	    console.error("Failed to start the server due to database connection error:", error);
-	}
-})();
+// Centralized error handler
+const errorHandler = (err, req, res, next) => {
+	console.error(err)
+	res.status(500).json({ message: 'Internal Server Error' });    
+};
+
+// Validation Middleware
+const validate = (schema) => {
+	return (req, res, next) => {
+
+		const dataToValidate = req.body && Object.keys(req.body).length > 0 ? req.body : req.query;
+		console.log('Validating:', dataToValidate.symbol); // Log the incoming data
+
+		const { error } = schema.validate(dataToValidate);
+		if (error) {
+			return res.status(400).json({ message: error.details[0].message });
+		}
+		next();
+	};
+};
+app.use(errorHandler)
+
+// Database connection
+let db;
+const connectToDatabase = async () => {
+    try {
+        db = await manager.connectDB();
+        app.locals.db = db; // Store the db in app.locals
+        app.listen(port, () => {
+            console.log(`Server is running on http://localhost:${port}`);
+        });
+    } catch (error) {
+        console.error("Failed to start the server due to database connection error:", error);
+        process.exit(1); // Exit the process if DB connection fails
+    }
+};
 
 
-// get coin metadata
-app.get('/coin/metadata', async (req, res) => {
-	// Accessing query parameters
-	const { symbol} = req.query;
+// Connect to the database
+connectToDatabase();
 
-	if (!symbol ) {
-		return res.status(400).send({ message: "Coin ID is required." });
-	}
-
+//Routes
+app.get('/coin/metadata', validate(COIN_META_DATA_GET_SCHEMA), async (req, res, next) => {
+	const {symbol} = req.query
 	try{
 		const coinMetadata = await manager.getCoinMetadata(db, symbol)
 		res.status(200).send(coinMetadata)
 	}catch (error){
-		console.error(error);
-		res.status(500).send(error);
+		next(error);
 	}
 });
 
-app.post('/coin/metadata', async (req, res) => {
+app.post('/coin/metadata', validate(COIN_META_DATA_SCHEMA), async (req, res, next) => {
 	try {
-		// Validate the request body against the schema
-		const { error } = COIN_META_DATA_SCHEMA.validate(req.body);
-		if (error) {
-			console.log(error.details[0].message)
-			return res.status(400).send({ message: error.details[0].message });
-		}
 		await manager.insertCoin(db, req.body)
 		return res.status(200).send("successfully inserted coin");
 	} catch (error) {
-		console.error(error);
-		res.status(500).send(error);
+		next(error);
 	}
 });
 
-app.post('/coin/priceInstance', async (req, res) => {
+app.post('/coin/priceInstance', validate(COIN_PRICE_INSTANCE_SCHEMA), async (req, res, next) => {
 	try {
-		// Validate the request body against the schema
-		console.log(req.body)
-		const { error } = COIN_PRICE_INSTANCE_SCHEMA.validate(req.body);
-		if (error) {
-			console.log(error.details[0].message)
-			return res.status(400).send({ message: error.details[0].message });
-		}
-
 		await manager.insertPriceInstance(db, req.body)
 		return res.status(200).send("successfully inserted priceInstance")
-
 	} catch (error) {
-		console.log(error)
-		res.status(500).send(error);
+		next(error);
 	}
 });
 
-// get current coin price
-// price Instances are delimited by hour, so for different graph increments, use numberOfInstances equal to hours in that time increment. i.e 1 day = 24 increments.
-// however, do make sure to add up whatever hours there are for the current day. i.e if you 1 day, then you really are doing the number of hours that have passed since midnight.
-// so if it is 8pm, then you need to set numberOfInstances to 20.
-
-// set numberOfInstances to 1 for latestPriceInstance
-app.get('/coin/priceInstance', async (req, res) => {
-	// Accessing query parameters
-	const { symbol, numberOfInstances} = req.query;
-
-	if (!symbol || !numberOfInstances) {
-		return res.status(400).send({ message: "Coin ID and numberOfInstances is required." });
-	}
-
+app.get('/coin/priceInstance', validate(COIN_PRICE_INSTANCE_GET_SCHEMA), async (req, res, next) => {
+	const {symbol, numberOfInstances} = req.query
 	try{
 		const priceInstance = await manager.getPriceInstance(db, symbol, numberOfInstances)
-		console.log(priceInstance)
 		res.status(200).send(priceInstance)
 	}catch (error){
-		console.error(error);
-		res.status(500).send(error);
+		next(error);
 	}
 });
 
-// get current coin price
-app.get('/coin/range', async (req, res) => {
-	// Accessing query parameters
-	const { start, end } = req.query;
+app.get('/coin/priceInstance/range', validate(COIN_PRICE_INSTANCE_RANGE_GET_SCHEMA), async (req, res, next) => {	
+	const { symbol, startDate, endDate} = req.query;
+	try{
+		const priceInstances = await manager.getPriceInstanceRange(db, symbol, startDate, endDate)
+		res.status(200).send(priceInstances)
+	}catch (error){
+		next(error);
+	}
 });
 
-
-
+app.get('/coin/all', async (req, res, next) => {
+	try{
+		const coins = await manager.getAllCoinsWithLatestPriceInstance(db)
+		res.status(200).send(coins)
+	}catch (error){
+		next(error);
+	}
+});
 
 
