@@ -4,7 +4,7 @@ import dotenv from "dotenv"
 dotenv.config();
 
 const KEY = process.env.CMC_API_KEY;
-const COIN_IDS_TO_TRACK = readLineFromFile("/backend/webFetcher/coins.txt", 1);
+const COIN_IDS_TO_TRACK = readLineFromFile("backend/webFetcher/coins.txt", 1);
 const PORT = process.env.PORT || 3000;
 
 
