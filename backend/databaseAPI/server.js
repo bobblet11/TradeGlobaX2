@@ -4,9 +4,17 @@ import * as manager from './manager.js'; // Ensure to add .js extension
 import Joi from 'joi';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import cors from 'cors'
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+const corsOptions = {
+	origin: '*', // Accept requests from all origins
+};
+
+// Enable CORS with options
+app.use(cors(corsOptions));
 
 const COIN_META_DATA_GET_SCHEMA = Joi.object({
 	symbol: Joi.string()

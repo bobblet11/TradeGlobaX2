@@ -1,0 +1,62 @@
+.table-container {
+  padding: 20px; /* Padding for the article containing the table */
+  max-width: 1200px; /* Maximum width for the table */
+  margin: auto; /* Center the article */
+}
+
+table {
+  width: 100%; /* Full width of the container */
+  border-collapse: collapse; /* Collapse borders for a cleaner look */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+th,
+td {
+  padding: 12px 15px; /* Padding for table cells */
+  text-align: left; /* Align text to the left */
+  border-bottom: 1px solid #e0e0e0; /* Light gray border for rows */
+}
+
+th {
+  background-color: #f4f4f4; /* Light gray background for headers */
+  font-weight: bold; /* Bold text for headers */
+}
+
+tr:hover {
+  background-color: #f9f9f9; /* Highlight row on hover */
+}
+
+.index-th,
+.name-th,
+.price-th,
+.hr-th,
+.tf-hr-th,
+.sd-th,
+.tf-hr-vol-th,
+.marketcap-th {
+  width: 10%; /* Width for price and percentage change columns */
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  table {
+    display: block; /* Make table block for smaller screens */
+    overflow-x: auto; /* Enable horizontal scroll */
+  }
+
+  th,
+  td {
+    display: block; /* Stack table cells */
+    width: 100%; /* Full width of the container */
+  }
+
+  th {
+    position: sticky; /* Sticky header for better usability */
+    top: 0; /* Stick to the top */
+    z-index: 1; /* Ensure header is above other content */
+  }
+
+  tr {
+    margin-bottom: 15px; /* Margin between rows */
+  }
+}

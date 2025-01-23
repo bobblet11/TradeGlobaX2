@@ -1,0 +1,36 @@
+.container{
+	display: flex;
+	max-width: 1200px; /* Maximum width for the table */
+	margin: auto; /* Center the article */
+	justify-content: center;
+	gap: 5rem;
+	height: 3rem;
+}
+
+.container div {
+	height: fit-content;
+	width: fit-content;
+	margin: auto 0;
+	font-size: 1.2rem;
+}
+
+
+.container button {
+	background-color: #007bff; /* Button color */
+	color: white; /* Text color */
+	border: none;
+	border-radius: 5px;
+	padding: 10px 15px;
+	margin: 0 10px; /* Space between buttons */
+	cursor: pointer;
+	transition: background-color 0.3s; /* Smooth transition */
+}
+
+.container button:disabled {
+background-color: #cccccc; /* Disabled button color */
+cursor: not-allowed; /* Change cursor on disabled */
+}
+
+.container button:hover:not(:disabled) {
+background-color: #0056b3; /* Darker shade on hover */
+}

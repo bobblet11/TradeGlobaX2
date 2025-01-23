@@ -236,6 +236,7 @@ export async function getAllCoinsWithLatestPriceInstance(db, query) {
           {
             $project: {
               symbol: 1,
+              logo:1,
               latestPriceInstance: {
                 $arrayElemAt: [
                   {
@@ -271,6 +272,7 @@ export async function getAllCoinsWithLatestPriceInstance(db, query) {
           {
             $project: {
               symbol: 1,
+              logo:1,
               latestPriceInstance: {
                 $arrayElemAt: [
                   {

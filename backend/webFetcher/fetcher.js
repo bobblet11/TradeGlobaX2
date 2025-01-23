@@ -131,8 +131,8 @@ async function insertPriceInstances(priceInstances) {
 }
 
 
-const runAtStartOfHour = async () => {
-	console.log('Running task at the start of the hour:', new Date().toISOString());
+const runAtStartOf = async () => {
+	console.log('Running task at :', new Date().toISOString());
 	const priceInstances = await fetchPriceInstanceData();
 	
 	if (priceInstances) {
@@ -141,31 +141,30 @@ const runAtStartOfHour = async () => {
 	}
 };
 
+
+
 const checkForStartOfHour = () => {
 	const now = new Date();
 	console.clear();
 	console.log(`Time is currently ${now}`);
 
 	if (now.getMinutes() === 0 && now.getSeconds() === 0) {
-		runAtStartOfHour();
+		runAtStartOf();
+	}
+};
+
+const checkForStartOfMinute = () => {
+	const now = new Date();
+	console.clear();
+	console.log(`Time is currently ${now}`);
+
+	if (now.getSeconds() === 0) {
+		runAtStartOf();
 	}
 };
 // await initDB()
 // setInterval(checkForStartOfHour, 1000);
-// console.log('Running task at the start of the hour:', new Date().toISOString());
-// const priceInstances = await fetchPriceInstanceData();
-
-// if (priceInstances) {
-//     await insertPriceInstances(priceInstances);
-//     console.log(`Inserted ${priceInstances.length} price instances.`);
-// }
+setInterval(checkForStartOfMinute, 1000);
 
 
-let response = await fetch(`http://localhost:${PORT}/coin/all?startCoin=0&endCoin=10`, {
-	method: "GET",
-	headers: { 'Content-Type': 'application/json' },
-});
-console.log(response.status)
-response=await response.json()
-console.log(response)
 
