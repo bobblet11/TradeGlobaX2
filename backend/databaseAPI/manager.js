@@ -57,8 +57,7 @@ export async function getPriceInstance(db, symbol, count) {
 }
 
 export async function getPriceInstanceRange(db, symbol, startDate, endDate) {
-
-  try{
+  try {
     const collection = db.collection("coin");
     const result = await collection
       .aggregate([
@@ -82,11 +81,17 @@ export async function getPriceInstanceRange(db, symbol, startDate, endDate) {
       ])
       .toArray();
 
-    if (!result || result.length === 0 || result[0].priceInstances.length === 0) {
-      throw new Error("No price instances found for this coin within the specified date range.");
+    if (
+      !result ||
+      result.length === 0 ||
+      result[0].priceInstances.length === 0
+    ) {
+      throw new Error(
+        "No price instances found for this coin within the specified date range."
+      );
     }
     return result[0].priceInstances.reverse();
-  }catch(error){
+  } catch (error) {
     throw error;
   }
 }
@@ -114,9 +119,13 @@ export async function insertCoin(db, coinMetadata) {
   const collection = db.collection("coin");
 
   try {
-    const existingCoin = await collection.findOne({ symbol: coinMetadata.symbol });
+    const existingCoin = await collection.findOne({
+      symbol: coinMetadata.symbol,
+    });
     if (existingCoin) {
-      throw new Error(`Coin with symbol ${coinMetadata.symbol} already exists.`);
+      throw new Error(
+        `Coin with symbol ${coinMetadata.symbol} already exists.`
+      );
     }
 
     const result = await collection.insertOne(coinMetadata);
@@ -142,13 +151,26 @@ export async function insertPriceInstance(db, coinPriceInstance) {
     });
 
     if (existingTimestamp) {
-      throw new Error(`Price instance with timestamp ${coinPriceInstance.timestamp} already exists for coin ${symbol}.`);
+      throw new Error(
+        `Price instance with timestamp ${coinPriceInstance.timestamp} already exists for coin ${symbol}.`
+      );
     }
 
-    const updateData = { $push: { priceInstances: coinPriceInstance }, $set: {} };
+    const updateData = {
+      $push: { priceInstances: coinPriceInstance },
+      $set: {},
+    };
     const today = new Date(coinPriceInstance.timestamp);
-    const dayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const dayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+    const dayStart = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+    const dayEnd = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() + 1
+    );
 
     const existingDailyInstances = await collection
       .aggregate([
@@ -176,8 +198,12 @@ export async function insertPriceInstance(db, coinPriceInstance) {
     if (existingDailyInstances.length > 0) {
       const priceInstances = existingDailyInstances[0].priceInstances;
       priceInstances.push(coinPriceInstance);
-      updateData.$set.dailyMax = Math.max(...priceInstances.map((instance) => instance.price));
-      updateData.$set.dailyMin = Math.min(...priceInstances.map((instance) => instance.price));
+      updateData.$set.dailyMax = Math.max(
+        ...priceInstances.map((instance) => instance.price)
+      );
+      updateData.$set.dailyMin = Math.min(
+        ...priceInstances.map((instance) => instance.price)
+      );
     } else {
       updateData.$set.dailyMax = coinPriceInstance.price;
       updateData.$set.dailyMin = coinPriceInstance.price;
@@ -192,31 +218,87 @@ export async function insertPriceInstance(db, coinPriceInstance) {
   }
 }
 
-export async function getAllCoinsWithLatestPriceInstance(db) {
+export async function getAllCoinsWithLatestPriceInstance(db, query) {
   const collection = db.collection("coin");
-
+  const queryParams = query && Object.keys(query).length > 0 ? query : null;
+  let startCoin = null;
+  let endCoin = null;
+  if (queryParams) {
+    startCoin = parseInt(query.startCoin, 10);
+    endCoin = parseInt(query.endCoin, 10);
+  }
+  
   try {
-    const result = await collection
-      .aggregate([
-        {
-          $project: {
-            symbol: 1,
-            latestPriceInstance: {
-              $arrayElemAt: [
-                {
-                  $sortArray: {
-                    input: "$priceInstances",
-                    sortBy: { timestamp: -1 },
+    let result = null;
+    if (startCoin!==null) {
+      result = await collection
+        .aggregate([
+          {
+            $project: {
+              symbol: 1,
+              latestPriceInstance: {
+                $arrayElemAt: [
+                  {
+                    $sortArray: {
+                      input: "$priceInstances",
+                      sortBy: { timestamp: -1 },
+                    },
                   },
-                },
-                0,
-              ],
+                  0,
+                ],
+              },
             },
           },
-        },
-        { $match: { latestPriceInstance: { $exists: true } } },
-      ])
-      .toArray();
+          { $match: { latestPriceInstance: { $exists: true } } },
+          {
+            $addFields: {
+              marketCap: { $ifNull: ["$latestPriceInstance.market_cap", 0] }, // Extract marketCap
+            },
+          },
+          { $sort: { marketCap: -1 } }, // Sort by marketCap in descending order
+          { $skip: startCoin },
+          { $limit: endCoin - startCoin },
+          {
+            $project: {
+              marketCap: 0, // Exclude marketCap from final result
+            },
+          },
+        ])
+        .toArray();
+    } else {
+      result = await collection
+        .aggregate([
+          {
+            $project: {
+              symbol: 1,
+              latestPriceInstance: {
+                $arrayElemAt: [
+                  {
+                    $sortArray: {
+                      input: "$priceInstances",
+                      sortBy: { timestamp: -1 },
+                    },
+                  },
+                  0,
+                ],
+              },
+            },
+          },
+          { $match: { latestPriceInstance: { $exists: true } } },
+          {
+            $addFields: {
+              marketCap: { $ifNull: ["$latestPriceInstance.market_cap", 0] }, // Extract marketCap
+            },
+          },
+          { $sort: { marketCap: -1 } }, // Sort by marketCap in descending order
+          {
+            $project: {
+              marketCap: 0, // Exclude marketCap from final result
+            },
+          },
+        ])
+        .toArray();
+    }
 
     if (result.length === 0) {
       throw new Error("No coins found with price instances.");

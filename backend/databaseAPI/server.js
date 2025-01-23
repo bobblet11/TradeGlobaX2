@@ -15,6 +15,13 @@ const COIN_META_DATA_GET_SCHEMA = Joi.object({
 	    .required()
 });
 
+const COIN_ALL_GET_SCHEMA = Joi.object({
+	startCoin: Joi.number()
+	    .optional(),
+	endCoin: Joi.number()
+	    .optional()
+});
+
 const COIN_PRICE_INSTANCE_GET_SCHEMA = Joi.object({
 	symbol: Joi.string()
 	    .uppercase()
@@ -82,8 +89,6 @@ const COIN_PRICE_INSTANCE_SCHEMA = Joi.object({
 });
     
 
-    
-
 // Middleware
 app.use(bodyParser.json());
 app.use(helmet());
@@ -101,12 +106,13 @@ const errorHandler = (err, req, res, next) => {
 	res.status(500).json({ message: 'Internal Server Error' });    
 };
 
+
 // Validation Middleware
 const validate = (schema) => {
 	return (req, res, next) => {
 
 		const dataToValidate = req.body && Object.keys(req.body).length > 0 ? req.body : req.query;
-		console.log('Validating:', dataToValidate.symbol); // Log the incoming data
+		console.log('Validating:', dataToValidate); // Log the incoming data
 
 		const { error } = schema.validate(dataToValidate);
 		if (error) {
@@ -147,6 +153,7 @@ app.get('/coin/metadata', validate(COIN_META_DATA_GET_SCHEMA), async (req, res, 
 	}
 });
 
+
 app.post('/coin/metadata', validate(COIN_META_DATA_SCHEMA), async (req, res, next) => {
 	try {
 		await manager.insertCoin(db, req.body)
@@ -155,6 +162,7 @@ app.post('/coin/metadata', validate(COIN_META_DATA_SCHEMA), async (req, res, nex
 		next(error);
 	}
 });
+
 
 app.post('/coin/priceInstance', validate(COIN_PRICE_INSTANCE_SCHEMA), async (req, res, next) => {
 	try {
@@ -185,9 +193,9 @@ app.get('/coin/priceInstance/range', validate(COIN_PRICE_INSTANCE_RANGE_GET_SCHE
 	}
 });
 
-app.get('/coin/all', async (req, res, next) => {
+app.get('/coin/all', validate(COIN_ALL_GET_SCHEMA), async (req, res, next) => {
 	try{
-		const coins = await manager.getAllCoinsWithLatestPriceInstance(db)
+		const coins = await manager.getAllCoinsWithLatestPriceInstance(db, req.query)
 		res.status(200).send(coins)
 	}catch (error){
 		next(error);

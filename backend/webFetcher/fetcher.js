@@ -4,7 +4,7 @@ import dotenv from "dotenv"
 dotenv.config();
 
 const KEY = process.env.CMC_API_KEY;
-const COIN_IDS_TO_TRACK = readLineFromFile("backend/webFetcher/coins.txt", 1);
+const COIN_IDS_TO_TRACK = readLineFromFile("coins.txt", 1);
 const PORT = process.env.PORT || 3000;
 
 
@@ -152,10 +152,20 @@ const checkForStartOfHour = () => {
 };
 // await initDB()
 // setInterval(checkForStartOfHour, 1000);
-console.log('Running task at the start of the hour:', new Date().toISOString());
-const priceInstances = await fetchPriceInstanceData();
+// console.log('Running task at the start of the hour:', new Date().toISOString());
+// const priceInstances = await fetchPriceInstanceData();
 
-if (priceInstances) {
-    await insertPriceInstances(priceInstances);
-    console.log(`Inserted ${priceInstances.length} price instances.`);
-}
+// if (priceInstances) {
+//     await insertPriceInstances(priceInstances);
+//     console.log(`Inserted ${priceInstances.length} price instances.`);
+// }
+
+
+let response = await fetch(`http://localhost:${PORT}/coin/all?startCoin=0&endCoin=10`, {
+	method: "GET",
+	headers: { 'Content-Type': 'application/json' },
+});
+console.log(response.status)
+response=await response.json()
+console.log(response)
+
