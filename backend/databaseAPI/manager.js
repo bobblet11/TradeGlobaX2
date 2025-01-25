@@ -43,14 +43,51 @@ export async function getPriceInstance(db, symbol, count) {
   try {
     const coin = await collection.findOne(
       { symbol },
-      { projection: { priceInstances: { $slice: -n } } }
+      {
+        projection: {
+          name: 1,
+          symbol: 1,
+          dailyMax: 1,
+          dailyMin: 1,
+          priceInstances: { $slice: -n },
+        },
+      }
     );
-
+ 
     if (!coin || !coin.priceInstances || coin.priceInstances.length === 0) {
       throw new Error("No price instances found for this coin.");
     }
 
     return coin.priceInstances.reverse();
+  } catch (error) {
+    throw error; // Re-throw the error for handling in the calling function
+  }
+}
+
+export async function getSpecificCoin(db, symbol) {
+  // Replace with your collection name
+  const collection = db.collection("coin");
+  try {
+    const coin = await collection.findOne(
+      { symbol },
+      {
+        projection: {
+          name: 1,
+          symbol: 1,
+          description: 1,
+          logo:1, 
+          dailyMax: 1,
+          dailyMin: 1,
+          priceInstances: { $slice: -1 },
+        },
+      }
+    );
+ 
+    if (!coin || !coin.priceInstances || coin.priceInstances.length === 0) {
+      throw new Error("No price instances found for this coin.");
+    }
+    console.log(coin)
+    return coin;
   } catch (error) {
     throw error; // Re-throw the error for handling in the calling function
   }
@@ -227,16 +264,16 @@ export async function getAllCoinsWithLatestPriceInstance(db, query) {
     startCoin = parseInt(query.startCoin, 10);
     endCoin = parseInt(query.endCoin, 10);
   }
-  
+
   try {
     let result = null;
-    if (startCoin!==null) {
+    if (startCoin !== null) {
       result = await collection
         .aggregate([
           {
             $project: {
               symbol: 1,
-              logo:1,
+              logo: 1,
               latestPriceInstance: {
                 $arrayElemAt: [
                   {
@@ -272,7 +309,7 @@ export async function getAllCoinsWithLatestPriceInstance(db, query) {
           {
             $project: {
               symbol: 1,
-              logo:1,
+              logo: 1,
               latestPriceInstance: {
                 $arrayElemAt: [
                   {

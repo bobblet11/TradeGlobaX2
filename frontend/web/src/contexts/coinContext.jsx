@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { getAllCoins } from '../services/APIcontroller';
 
 const CoinContext = createContext();
 
@@ -11,10 +12,8 @@ export const CoinProvider = ({ children }) => {
 
   const fetchCoins = async () => {
     try {
-      const response = await fetch('http://localhost:3000/coin/all');
-      const data = await response.json();
-      const filteredData = data.filter(item => item.latestPriceInstance !== null);
-      setCoins(filteredData); 
+      const coins = await getAllCoins()
+      setCoins(coins); 
     } catch (error) {
       console.error("Error fetching coins:", error);
     }
@@ -25,7 +24,7 @@ export const CoinProvider = ({ children }) => {
 
     const intervalId = setInterval(() => {
       fetchCoins(); // Fetch coins every 10 seconds
-    }, 5000); // 10000 milliseconds = 10 seconds
+    }, 60000); // 10000 milliseconds = 10 seconds
 
     return () => {
       clearInterval(intervalId); // Cleanup interval on unmount

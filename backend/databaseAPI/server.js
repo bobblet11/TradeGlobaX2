@@ -63,8 +63,14 @@ const COIN_META_DATA_SCHEMA = Joi.object({
 	logo: Joi.string()
 	    .uri()
 	    .required()
-    });
+});
 
+const COIN_GET_SPECIFIC_SCHEMA = Joi.object({
+symbol: Joi.string()
+	.uppercase()
+	.min(1)
+	.required()
+})
     
 const COIN_PRICE_INSTANCE_SCHEMA = Joi.object({
 	symbol: Joi.string()
@@ -209,5 +215,18 @@ app.get('/coin/all', validate(COIN_ALL_GET_SCHEMA), async (req, res, next) => {
 		next(error);
 	}
 });
+
+app.get('/coin', validate(COIN_GET_SPECIFIC_SCHEMA), async (req, res, next) => {
+	const { symbol} = req.query;
+	try{
+		const coin = await manager.getSpecificCoin(db, symbol)
+		console.log(coin)
+		res.status(200).send(coin)
+	}catch (error){
+		next(error);
+	}
+});
+
+
 
 

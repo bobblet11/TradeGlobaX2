@@ -1,0 +1,28 @@
+.green{
+	color: green;
+}
+
+.red{
+	color: red;
+}
+
+.summary_container{
+	width: 30rem;
+	height: 30rem;
+	background-color: red;
+	display: flex;
+	flex-direction: column;
+}
+
+.price-container{
+	width: 100%;
+	display: flex;
+	height: 100%;
+}
+
+.range{
+	width:100%;
+	background-color: red;
+	height: 7rem;
+	display: flex;
+}
