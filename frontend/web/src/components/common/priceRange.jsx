@@ -1,7 +1,21 @@
 import "./priceRange.css"
-import { Stage, Layer, Circle, Rect, Text} from 'react-konva';
+import { Stage, Layer, Circle, Rect} from 'react-konva';
 import { useRef, useState, useEffect } from "react";
 import { formatNumber } from "../../utils/format";
+
+function getColor(value) {
+	let red, green;
+    
+	if (value <= 0.5) {
+	    red = 255; // Red remains at 255
+	    green = Math.round(255 * (value * 2)); // Green increases from 0 to 255
+	} else {
+	    red = Math.round(255 * (1 - (value - 0.5) * 2)); // Red decreases from 255 to 0
+	    green = 255; // Green stays at 255
+	}
+    
+	return `rgb(${red}, ${green}, 0)`; // Blue remains 0
+    }
 
 export default function PriceRange({min, value, max}){
 	const MIN_PROGRESS_WIDTH = 20;
@@ -10,8 +24,8 @@ export default function PriceRange({min, value, max}){
 		pointerPosition=(value - min) / (max - min)
 	}
 	const divRef = useRef(null);
-	const color = pointerPosition < 0.33 ? 'green' : pointerPosition < 0.66 ? 'yellow' : 'red';
-    
+	const color = getColor(pointerPosition)
+	
 	const [dimensions, setDimensions] = useState({
 	    width: 0,
 	    height: 0
@@ -44,7 +58,7 @@ export default function PriceRange({min, value, max}){
 					<Rect
 						x={dimensions.width * 0.05 - 9}
 						y={dimensions.height / 2 - 10}
-						width={dimensions.width * pointerPosition  + MIN_PROGRESS_WIDTH}
+						width={(dimensions.width*0.9) * pointerPosition  + MIN_PROGRESS_WIDTH}
 						height={20}
 						fill={color}
 						cornerRadius={1000}

@@ -1,0 +1,24 @@
+.site-header-container{
+	width:100%;
+	display: flex;
+	gap:2rem;
+	align-items: center;
+	justify-content: center;
+	height: fit-content;
+	margin-top: 2rem;
+	margin-bottom: 1rems;
+}
+
+.site-header-container * {
+	margin: 0;
+}
+
+.site-header-container > h1{
+	font-size: 5rem;
+	justify-self: center;
+	
+}
+
+.site-header-container > h2{
+	font-size: 2rem;
+}

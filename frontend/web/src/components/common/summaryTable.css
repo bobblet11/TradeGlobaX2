@@ -1,28 +1,111 @@
-.green{
-	color: green;
+.green {
+  color: green;
 }
 
-.red{
-	color: red;
+.red {
+  color: red;
 }
 
-.summary_container{
-	width: 30rem;
-	height: 30rem;
-	background-color: red;
-	display: flex;
-	flex-direction: column;
+.summary_container {
+  width: 30rem;
+  height: auto; /* Change to auto to accommodate content */
+  background-color: #ffffff; /* White background for clarity */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Slightly stronger shadow */
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem; /* Padding for inner spacing */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
-.price-container{
+.index-symbol {
+  margin: 0;
+  margin-left: 0.7rem;
+  margin-right: 0.2rem;
+  background-color: rgb(177, 177, 177);
+  padding: 0.4rem;
+  border-radius: 9px;
+  color: rgb(82, 82, 82);
+}
+
+.price-container {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* Center elements */
+  align-items: center; /* Center vertically */
+  background-color: #f0f4f8; /* Light grayish blue for contrast */
+  border-radius: 5px; /* Rounded corners */
+  padding: 1rem 0;
+}
+
+.price-container > div{
 	width: 100%;
 	display: flex;
-	height: 100%;
+	flex-direction: column;
+	padding: 0.2rem 1rem;
+
 }
 
-.range{
-	width:100%;
-	background-color: red;
-	height: 7rem;
-	display: flex;
+.range {
+  width: 100%;
+  background-color: #e0f7fa; /* Soft cyan background */
+  height: 7rem;
+  display: flex;
+  align-items: center; /* Center content vertically */
+  border-radius: 5px; /* Rounded corners */
+  margin-top: 1rem; /* Spacing above */
+}
+
+.price-title {
+  font-size: 1rem;
+  color: rgb(100, 100, 100);
+  word-spacing: 0.4rem;
+  margin: 0;
+  text-align: left;
+  margin-bottom: 0.5rem;
+}
+
+.price-instance-pair {
+  display: flex;
+  width: 100%;
+  padding: 1rem 0;
+  border-bottom: 1px solid #ccc; /* Divider line */
+}
+
+.summary_container li {
+  list-style-type: none;
+  margin: auto;
+}
+
+.summary_container ul {
+  padding: 0;
+  margin-top: 1rem; /* Spacing above the list */
+}
+
+.price-instance-key {
+  font-size: 1.3rem;
+  text-align: left;
+  flex: 1; /* Use flex to distribute space */
+}
+
+.price-instance-value {
+  margin: auto 0;
+  margin-left: 1rem; /* Spacing between key and value */
+  font-weight: bold; /* Emphasize values */
+}
+
+.price {
+  font-size: 3rem;
+  text-align: center;
+}
+
+.arrow {
+  font-size: 1.8rem;
+}
+
+.arrow svg {
+  margin-left: 1.5rem;
+  margin-right: 0.5rem;
 }

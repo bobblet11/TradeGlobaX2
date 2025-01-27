@@ -53,7 +53,7 @@ export async function getPriceInstance(db, symbol, count) {
         },
       }
     );
- 
+
     if (!coin || !coin.priceInstances || coin.priceInstances.length === 0) {
       throw new Error("No price instances found for this coin.");
     }
@@ -75,18 +75,18 @@ export async function getSpecificCoin(db, symbol) {
           name: 1,
           symbol: 1,
           description: 1,
-          logo:1, 
+          logo: 1,
           dailyMax: 1,
           dailyMin: 1,
           priceInstances: { $slice: -1 },
         },
       }
     );
- 
+
     if (!coin || !coin.priceInstances || coin.priceInstances.length === 0) {
       throw new Error("No price instances found for this coin.");
     }
-    console.log(coin)
+    console.log(coin);
     return coin;
   } catch (error) {
     throw error; // Re-throw the error for handling in the calling function
@@ -94,30 +94,58 @@ export async function getSpecificCoin(db, symbol) {
 }
 
 export async function getPriceInstanceRange(db, symbol, startDate, endDate) {
+  console.log(startDate, endDate);
   try {
     const collection = db.collection("coin");
     const result = await collection
       .aggregate([
-        { $match: { symbol: symbol } }, // Match the specific coin by symbol
+        { $match: { symbol } },
         {
           $project: {
             priceInstances: {
               $filter: {
-                input: "$priceInstances",
-                as: "instance",
+                input: {
+                  $map: {
+                    input: "$priceInstances",
+                    as: "instance",
+                    in: {
+                      $mergeObjects: [
+                        "$$instance",
+                        {
+                          timestampDate: {
+                            $dateFromString: {
+                              dateString: "$$instance.timestamp",
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+                as: "instanceWithDate",
                 cond: {
                   $and: [
-                    { $gte: ["$$instance.timestamp", startDate] },
-                    { $lte: ["$$instance.timestamp", endDate] }, // Use < for exclusive end
+                    {
+                      $gte: [
+                        "$$instanceWithDate.timestampDate",
+                        { $dateFromString: { dateString: startDate } }, // Convert startDate to date
+                      ],
+                    },
+                    {
+                      $lte: [
+                        "$$instanceWithDate.timestampDate",
+                        { $dateFromString: { dateString: endDate } }, // Convert endDate to date
+                      ],
+                    },
                   ],
                 },
               },
             },
           },
         },
+        { $match: { "priceInstances.0": { $exists: true } } }, // Ensures documents with price instances are returned
       ])
       .toArray();
-
     if (
       !result ||
       result.length === 0 ||
@@ -171,6 +199,34 @@ export async function insertCoin(db, coinMetadata) {
   }
 }
 
+export async function updateCoin(db, coinMetadata) {
+  const collection = db.collection("coin");
+
+  try {
+    const existingCoin = await collection.findOne({
+      symbol: coinMetadata.symbol,
+    });
+    if (!existingCoin) {
+      throw new Error(
+        `Coin with symbol ${coinMetadata.symbol} does not exist.`
+      );
+    }
+
+    const result = await collection.updateOne(
+      { symbol: coinMetadata.symbol },
+      {
+        $set: {
+          name: coinMetadata.name,
+          description: coinMetadata.description,
+          logo: coinMetadata.logo,
+        },
+      }
+    );
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function insertPriceInstance(db, coinPriceInstance) {
   const collection = db.collection("coin");
   const symbol = coinPriceInstance.symbol;
@@ -192,23 +248,18 @@ export async function insertPriceInstance(db, coinPriceInstance) {
         `Price instance with timestamp ${coinPriceInstance.timestamp} already exists for coin ${symbol}.`
       );
     }
-
     const updateData = {
       $push: { priceInstances: coinPriceInstance },
       $set: {},
     };
+
     const today = new Date(coinPriceInstance.timestamp);
     const dayStart = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate()
+      Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
     );
     const dayEnd = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() + 1
+      Date.UTC(today.getFullYear(), today.getMonth(), today.getDate() + 1)
     );
-
     const existingDailyInstances = await collection
       .aggregate([
         { $match: { symbol } },
@@ -216,19 +267,36 @@ export async function insertPriceInstance(db, coinPriceInstance) {
           $project: {
             priceInstances: {
               $filter: {
-                input: "$priceInstances",
-                as: "instance",
+                input: {
+                  $map: {
+                    input: "$priceInstances",
+                    as: "instance",
+                    in: {
+                      $mergeObjects: [
+                        "$$instance",
+                        {
+                          timestampDate: {
+                            $dateFromString: {
+                              dateString: "$$instance.timestamp",
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+                as: "instanceWithDate",
                 cond: {
                   $and: [
-                    { $gte: ["$$instance.timestamp", dayStart] },
-                    { $lt: ["$$instance.timestamp", dayEnd] },
+                    { $gte: ["$$instanceWithDate.timestampDate", dayStart] },
+                    { $lte: ["$$instanceWithDate.timestampDate", dayEnd] },
                   ],
                 },
               },
             },
           },
         },
-        { $match: { "priceInstances.0": { $exists: true } } },
+        { $match: { "priceInstances.0": { $exists: true } } }, // Ensures documents with price instances are returned
       ])
       .toArray();
 

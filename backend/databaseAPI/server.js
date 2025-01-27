@@ -126,7 +126,6 @@ const validate = (schema) => {
 	return (req, res, next) => {
 
 		const dataToValidate = req.body && Object.keys(req.body).length > 0 ? req.body : req.query;
-		console.log('Validating:', dataToValidate); // Log the incoming data
 
 		const { error } = schema.validate(dataToValidate);
 		if (error) {
@@ -172,10 +171,21 @@ app.post('/coin/metadata', validate(COIN_META_DATA_SCHEMA), async (req, res, nex
 	try {
 		await manager.insertCoin(db, req.body)
 		return res.status(200).send("successfully inserted coin");
+		
 	} catch (error) {
 		next(error);
 	}
 });
+
+app.put('/coin/metadata', validate(COIN_META_DATA_SCHEMA), async (req, res, next) => {
+	try {
+		await manager.updateCoin(db, req.body)
+		return res.status(200).send("successfully inserted coin");
+	} catch (error) {
+		next(error);
+	}
+});
+
 
 
 app.post('/coin/priceInstance', validate(COIN_PRICE_INSTANCE_SCHEMA), async (req, res, next) => {

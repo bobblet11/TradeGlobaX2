@@ -1,8 +1,10 @@
 import fs from 'fs';
 import dotenv from "dotenv"
+import readline from 'readline';
 
 dotenv.config();
 
+const CONN_BATCH_SIZE = 300;
 const KEY = process.env.CMC_API_KEY;
 const COIN_IDS_TO_TRACK = readLineFromFile("coins.txt", 1);
 const PORT = process.env.PORT || 3000;
@@ -21,7 +23,7 @@ function readLineFromFile(filePath, lineNumber) {
 
 
 async function initDB(){
-	const initialCoins = await fetchInitData();
+	const initialCoins = await fetchMetadata();
 	if (!initialCoins) return; // Exit early if fetch failed
     
 	let numOfSuccess = 0;
@@ -46,13 +48,14 @@ async function initDB(){
 		    console.error(`Error inserting coin: ${error.message}`);
 		    numOfFail++;
 		}
-	
-		console.clear();
+		
+		readline.cursorTo(process.stdout, 0)
+		readline.clearLine(process.stdout, 0)
 		console.log(`Requests success: ${numOfSuccess}, Fail: ${numOfFail}`);
 	    }
 }
 
-async function fetchInitData() {
+async function fetchMetadata() {
     console.log("Fetching coin info for 1000 coins...");
     try {
         const response = await fetch(`https://pro-api.coinmarketcap.com/v2/cryptocurrency/info?id=${COIN_IDS_TO_TRACK}`, {
@@ -113,31 +116,103 @@ async function generatePriceInstanceDTOs(dataJson) {
 }
 
 async function insertPriceInstances(priceInstances) {
-	const requests = priceInstances.map(async (priceInstance) => {
-	    try {
-		const response = await fetch(`http://localhost:${PORT}/coin/priceInstance`, {
-		    method: "POST",
-		    headers: { 'Content-Type': 'application/json' },
-		    body: JSON.stringify(priceInstance),
-		});
-    
-		if (!response.ok) {
-		    throw new Error(`Failed to insert price instance for ${priceInstance.symbol}: ${response.statusText}`);
+	let successes = 0
+	let failures = 0
+	const queue = [...priceInstances]
+	const errors =[]
+
+	const processPriceInstance  = async (priceInstance)=>{
+		try {
+			const response = await fetch(`http://localhost:${PORT}/coin/priceInstance`, {
+			    method: "POST",
+			    headers: { 'Content-Type': 'application/json' },
+			    body: JSON.stringify(priceInstance),
+			});
+	    
+			if (!response.ok) {
+			    throw new Error(`Failed to insert price instance for ${priceInstance.symbol}: ${response.statusText}`);
+			}
+			successes += 1;
+		} catch (error) {
+			errors.push(error)
+			failures += 1;
 		}
-	    } catch (error) {
-		console.error(error.message);
-	    }
-	});
+		// Log the current status after each request
+		readline.cursorTo(process.stdout, 0,9);
+		readline.clearLine(process.stdout, 0);
+		console.log(`Requests success: ${successes}, Fail: ${failures}`);
+	}
+
+	// Processing function to control concurrency
+	const processQueue = async () => {
+		while (queue.length > 0) {
+		    // Slice the queue to get the next batch of requests
+		    const batch = queue.splice(0, CONN_BATCH_SIZE);
+		    await Promise.all(batch.map(processPriceInstance));
+		}
+	};
+
+	// Start processing the queue
+	await processQueue();
+	console.log(`Final Requests success: ${successes}, Fail: ${failures}`);
+}
+
+async function updateMetadata(metadatas) {
+	let successes = 0
+	let failures = 0
+	const queue = [...metadatas]
+	const errors = []
+
+	const processMetadata = async (metadata)=>{
+		try {
+			const response = await fetch(`http://localhost:${PORT}/coin/metadata`, {
+				method: "PUT",
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(metadata),
+			});
+		
+			if (!response.ok) {
+			
+				throw new Error(`Failed to insert price instance for ${metadata.symbol}: ${response.statusText}`);
+			}
+			successes += 1
+			} catch (error) {
+				errors.push(error)
+				failures +=1
+		}
+		// Log the current status after each request
+		readline.cursorTo(process.stdout, 0,4);
+		readline.clearLine(process.stdout, 0);
+		console.log(`Requests success: ${successes}, Fail: ${failures}`);
+	}
+
+	// Processing function to control concurrency
+	const processQueue = async () => {
+		while (queue.length > 0) {
+		    // Slice the queue to get the next batch of requests
+		    const batch = queue.splice(0, CONN_BATCH_SIZE);
+		    await Promise.all(batch.map(processMetadata));
+		}
+	};
+
+	// Start processing the queue
+	await processQueue();
+	console.log(`Final Requests success: ${successes}, Fail: ${failures}`);
 }
 
 
 const runAtStartOf = async () => {
 	console.log('Running task at :', new Date().toISOString());
+	// const metadatas = await fetchMetadata();
+	// console.log("updating METADATA")
+	// if (metadatas){
+	// 	await updateMetadata(metadatas);
+	// }
+
 	const priceInstances = await fetchPriceInstanceData();
-	
+	console.log("inserting prices")
 	if (priceInstances) {
 	    await insertPriceInstances(priceInstances);
-	    console.log(`Inserted ${priceInstances.length} price instances.`);
 	}
 };
 
@@ -159,12 +234,17 @@ const checkForStartOfMinute = () => {
 	console.log(`Time is currently ${now}`);
 
 	if (now.getSeconds() === 0) {
-		runAtStartOf();
+		try{
+			runAtStartOf();
+		}catch(err){
+			console.error(err)
+		}
 	}
 };
 // await initDB()
 // setInterval(checkForStartOfHour, 1000);
-setInterval(checkForStartOfMinute, 1000);
+// setInterval(checkForStartOfMinute, 1000);
+runAtStartOf()
 
 
 
