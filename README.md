@@ -11,7 +11,7 @@ A full stack web project that displays real-time financial data for over 1,000 c
 ## Techstack
 1. Frontend
 - React
-- Korva
+- Konva
 - Chart.Js
 2. Database API
 - Express.JS
