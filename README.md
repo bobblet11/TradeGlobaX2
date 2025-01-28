@@ -9,11 +9,11 @@ A full stack web project that displays real-time financial data for over 1,000 c
 - Price charting
 
 ## Techstack
-1. Frontend
+### Frontend
 - React
 - Konva
 - Chart.Js
-2. Database API
+### Database API
 - Express.JS
 - MongoDB
 
