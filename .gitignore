@@ -5,3 +5,4 @@ backend/webScraper/node_modules
 backend/databaseAPI/.env
 backend/webFetcher/.env
 frontend/node_modules
+./node_modules
