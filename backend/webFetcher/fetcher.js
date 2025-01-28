@@ -21,6 +21,24 @@ function readLineFromFile(filePath, lineNumber) {
 	return lines[lineNumber - 1].trim(); // Trim whitespace
 }
 
+async function removeDuplicates(){
+	const response = await fetch(`https://pro-api.coinmarketcap.com/v2/cryptocurrency/info?id=${COIN_IDS_TO_TRACK}`, {
+		method: "GET",
+		headers: { "X-CMC_PRO_API_KEY": KEY },
+	});
+	const dataJson = await response.json();
+	let uniqueString = ""
+	let count = 0
+	const symbolSet = new Set()
+	Object.entries(dataJson["data"]).map(([key,value]) => { // Destructure to get coin
+		if (!symbolSet.has(value.symbol)){
+			symbolSet.add(value.symbol)
+			uniqueString+=value.id+","
+			count +=1
+		}
+	});
+	uniqueString = uniqueString.substring(0,uniqueString.length-2)
+}
 
 async function initDB(){
 	const initialCoins = await fetchMetadata();
@@ -34,7 +52,8 @@ async function initDB(){
 		    const response = await fetch(`http://localhost:${PORT}/coin/metadata`, {
 			method: "POST",
 			headers: {
-			    'Content-Type': 'application/json'
+			    'Content-Type': 'application/json',
+			    "X-API-Key": process.env.DAPI_API_KEY
 			},
 			body: JSON.stringify(coin),
 		    });
@@ -125,8 +144,12 @@ async function insertPriceInstances(priceInstances) {
 		try {
 			const response = await fetch(`http://localhost:${PORT}/coin/priceInstance`, {
 			    method: "POST",
-			    headers: { 'Content-Type': 'application/json' },
+			    headers: { 
+				'Content-Type': 'application/json',
+				"X-API-Key": process.env.DAPI_API_KEY
+			     },
 			    body: JSON.stringify(priceInstance),
+
 			});
 	    
 			if (!response.ok) {
@@ -138,7 +161,7 @@ async function insertPriceInstances(priceInstances) {
 			failures += 1;
 		}
 		// Log the current status after each request
-		readline.cursorTo(process.stdout, 0,9);
+		readline.cursorTo(process.stdout, 0,6);
 		readline.clearLine(process.stdout, 0);
 		console.log(`Requests success: ${successes}, Fail: ${failures}`);
 	}
@@ -167,7 +190,10 @@ async function updateMetadata(metadatas) {
 		try {
 			const response = await fetch(`http://localhost:${PORT}/coin/metadata`, {
 				method: "PUT",
-				headers: { 'Content-Type': 'application/json' },
+				headers: { 
+					'Content-Type': 'application/json',
+					"X-API-Key": process.env.DAPI_API_KEY
+				},
 				body: JSON.stringify(metadata),
 			});
 		
@@ -203,11 +229,11 @@ async function updateMetadata(metadatas) {
 
 const runAtStartOf = async () => {
 	console.log('Running task at :', new Date().toISOString());
-	// const metadatas = await fetchMetadata();
-	// console.log("updating METADATA")
-	// if (metadatas){
-	// 	await updateMetadata(metadatas);
-	// }
+	const metadatas = await fetchMetadata();
+	console.log("updating METADATA")
+	if (metadatas){
+		await updateMetadata(metadatas);
+	}
 
 	const priceInstances = await fetchPriceInstanceData();
 	console.log("inserting prices")
@@ -242,9 +268,11 @@ const checkForStartOfMinute = () => {
 	}
 };
 // await initDB()
-// setInterval(checkForStartOfHour, 1000);
+setInterval(checkForStartOfHour, 1000);
 // setInterval(checkForStartOfMinute, 1000);
-runAtStartOf()
+// runAtStartOf()
+
+// await removeDuplicates()
 
 
 

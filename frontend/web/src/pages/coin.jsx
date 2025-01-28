@@ -7,6 +7,17 @@ import PriceGraph from "../components/common/priceGraph";
 import Chart from "chart.js/auto";
 import { CategoryScale } from "chart.js";
 
+const EMPTY_CHART = {
+  labels: [],
+  datasets: [
+      {
+        label: '',
+        data: [],
+        borderWidth: 1,
+      }
+  ]
+}
+
 Chart.register(CategoryScale);
 function CoinPage() {
   const location = useLocation();
@@ -16,16 +27,7 @@ function CoinPage() {
 
   const [coin, setCoin] = useState(null);
   const [timeframe, setTimeframe] = useState("24h")
-  const [chartData, setChartData] = useState({
-		labels: [],
-		datasets: [
-		    {
-		      label: '',
-		      data: [],
-		      borderWidth: 1,
-		    }
-		]
-	})
+  const [chartData, setChartData] = useState(EMPTY_CHART)
 
   const fetchCoin = async () => {
     try {
@@ -42,6 +44,7 @@ function CoinPage() {
       setChartData(priceInstances);
     } catch (error) {
       console.error("Error fetching chart data:", error);
+      setChartData(EMPTY_CHART);
     }
   };
 

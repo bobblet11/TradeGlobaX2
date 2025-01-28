@@ -161,6 +161,19 @@ export async function getPriceInstanceRange(db, symbol, startDate, endDate) {
   }
 }
 
+export async function authenticateKey(db, key) {
+  const collection = db.collection("user");
+
+  // Use a case-insensitive search if needed, or ensure `key` is sanitized
+  const user = await collection.findOne({ key });
+
+  if (!user) {
+      throw new Error("Cannot authenticate user");
+  }
+
+  return user; // Optionally return the user object if needed
+}
+
 export async function getCoinMetadata(db, symbol) {
   const collection = db.collection("coin");
 
