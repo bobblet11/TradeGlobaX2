@@ -1,0 +1,19 @@
+{
+  "name": "tradeglobax_version3",
+  "version": "1.0.0",
+  "description": "A full stack web project that displays real-time financial data for over 1,000 cryptocurrencies.",
+  "main": "index.js",
+  "scripts": {
+    "build1":"npm install --prefix backend/webFetcher/",
+    "build2":"npm install --prefix backend/databaseAPI/",
+    "deploy1":"node backend/databaseAPI/server.js",
+    "deploy2":"node backend/webFetcher/fetcher.js",
+    "build":"concurrently \"npm run build1\" \"npm run build2\"",
+    "deploy":"concurrently \"npm run deploy1\" \"npm run deploy2\""
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
