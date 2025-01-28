@@ -6,7 +6,7 @@ dotenv.config();
 
 const CONN_BATCH_SIZE = 300;
 const KEY = process.env.CMC_API_KEY;
-const COIN_IDS_TO_TRACK = readLineFromFile("./coins.txt", 1);
+const COIN_IDS_TO_TRACK = readLineFromFile("/backend/webFetcher/coins.txt", 1);
 const PORT = process.env.PORT || 3000;
 
 
