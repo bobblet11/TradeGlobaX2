@@ -8,6 +8,16 @@ A full stack web project that displays real-time financial data for over 1,000 c
 - User-friendly interface
 - Price charting
 
+## Techstack
+1. Frontend
+- React
+- Korva
+- Chart.Js
+2. Database API
+- Express.JS
+- MongoDB
+
+
 ## Installation Instructions
 1. Clone the repository:
    ```bash
