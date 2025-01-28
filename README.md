@@ -39,7 +39,7 @@ each project can be executed using the following,
 ## Acknowledgements
 CoinMarketCap API for non-historical cryptocurrency data.
 
-## LICENSE
+## License
 MIT License
 
 Copyright (c) 2025 Benjamin Jun-jie Glover
