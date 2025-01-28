@@ -24,6 +24,43 @@ A full stack web project that displays real-time financial data for over 1,000 c
   npm install
   ```
 
+## Dependencies
+1. React frontend
+   ```bash
+   "@fortawesome/fontawesome-svg-core": "^6.7.2",
+   "@fortawesome/free-brands-svg-icons": "^6.7.2",
+   "@fortawesome/free-regular-svg-icons": "^6.7.2",
+   "@fortawesome/free-solid-svg-icons": "^6.7.2",
+   "@fortawesome/react-fontawesome": "^0.2.2",
+   "chart.js": "^4.4.7",
+   "dotenv": "^16.4.7",
+   "konva": "^8.3.5",
+   "react": "^18.3.1",
+   "react-chartjs-2": "^5.3.0",
+   "react-dom": "^18.3.1",
+   "react-konva": "^17.0.2-6",
+   "react-router-dom": "^7.1.3"
+   ```
+2. Database API
+   ```bash
+   "cors": "^2.8.5",
+   "dotenv": "^16.4.7",
+   "express": "^4.21.2",
+   "express-rate-limit": "^7.5.0",
+   "helmet": "^8.0.0",
+   "joi": "^17.13.3",
+   "mongodb": "^6.12.0",
+   "morgan": "^1.10.0",
+   "nodemon": "^3.1.9"
+   ```
+3. CoinMarketCap API fetcher
+   ```bash
+   "dotenv": "^16.4.7",
+   "fs": "^0.0.1-security",
+   "readline": "^1.3.0"
+   ```
+
+
 ## Usage Instructions
 each project can be executed using the following,
    ```bash
