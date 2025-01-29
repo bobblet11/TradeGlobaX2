@@ -246,21 +246,18 @@ const runAtStartOf = async () => {
 
 const checkForStartOfHour = () => {
 	const now = new Date();
-	console.clear();
-	console.log(`Time is currently ${now}`);
 
 	if (now.getMinutes() === 0 && now.getSeconds() === 0) {
+		console.log(`Time is currently ${now}`);
 		runAtStartOf();
 	}
 };
 
 const checkForStartOfMinute = () => {
 	const now = new Date();
-	console.clear();
-	console.log(`Time is currently ${now}`);
-
 	if (now.getSeconds() === 0) {
 		try{
+			console.log(`Time is currently ${now}`);
 			runAtStartOf();
 		}catch(err){
 			console.error(err)
@@ -268,7 +265,7 @@ const checkForStartOfMinute = () => {
 	}
 };
 // await initDB()
-setInterval(checkForStartOfHour, 1000);
+runAtStartOf();
 // setInterval(checkForStartOfMinute, 1000);
 // runAtStartOf()
 
