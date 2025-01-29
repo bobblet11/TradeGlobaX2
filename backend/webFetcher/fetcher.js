@@ -4,7 +4,7 @@ import readline from 'readline';
 
 dotenv.config();
 
-const CONN_BATCH_SIZE = 300;
+const CONN_BATCH_SIZE = 100;
 const KEY = process.env.CMC_API_KEY;
 const COIN_IDS_TO_TRACK = readLineFromFile("backend/webFetcher/coins.txt", 1);
 const PORT = process.env.PORT || 3000;
@@ -265,7 +265,8 @@ const checkForStartOfMinute = () => {
 	}
 };
 // await initDB()
-runAtStartOf();
+// runAtStartOf();
+setInterval(checkForStartOfHour,1000);
 // setInterval(checkForStartOfMinute, 1000);
 // runAtStartOf()
 
