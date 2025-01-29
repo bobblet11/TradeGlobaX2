@@ -48,7 +48,7 @@ connectToDatabase();
 
 
 const corsOptions = {
-	origin: `${process.env.SITE_ORIGIN} ${process.env.FETCHER_ORIGIN}`,// Allow only this origin
+	origin: `${process.env.SITE_ORIGIN}`,// Allow only this origin
 	methods: 'GET,PUT,POST', // Allowed HTTP methods
 	preflightContinue: false, // Pass the CORS preflight response to the next handler
 	optionsSuccessStatus: 204, // Respond with 204 for successful OPTIONS requests
