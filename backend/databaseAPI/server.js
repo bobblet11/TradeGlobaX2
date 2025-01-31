@@ -57,12 +57,12 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 
-// // built in middlewares
-// const limiter = rateLimit({
-//     windowMs: 1 * 60 * 1000, // 15 minutes
-//     max: 1000 // limit each IP to 100 requests per windowMs
-// });
-// app.use(limiter);
+// built in middlewares
+const limiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 15 minutes
+    max: 1000 // limit each IP to 100 requests per windowMs
+});
+app.use(limiter);
 app.use(bodyParser.json());
 app.use(helmet());
 app.use(morgan('combined'));
