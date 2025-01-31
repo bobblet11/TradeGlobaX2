@@ -4,7 +4,7 @@ import readline from 'readline';
 
 dotenv.config();
 
-const CONN_BATCH_SIZE = 300;
+const CONN_BATCH_SIZE = 100;
 const KEY = process.env.CMC_API_KEY;
 const COINS_PATH = process.env.COINS_PATH;
 const COIN_IDS_TO_TRACK = readLineFromFile(COINS_PATH, 1);
