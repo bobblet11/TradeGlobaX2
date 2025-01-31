@@ -6,7 +6,8 @@ dotenv.config();
 
 const CONN_BATCH_SIZE = 300;
 const KEY = process.env.CMC_API_KEY;
-const COIN_IDS_TO_TRACK = readLineFromFile("coins.txt", 1);
+const COINS_PATH = process.env.COINS_PATH;
+const COIN_IDS_TO_TRACK = readLineFromFile(COINS_PATH, 1);
 const PORT = process.env.PORT || 3000;
 
 
