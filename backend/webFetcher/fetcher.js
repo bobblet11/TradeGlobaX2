@@ -260,8 +260,8 @@ const checkForStartOfMinute = () => {
 };
 // await initDB()
 // runAtStartOf();
-runAtStartOf();
-// setInterval(checkForStartOfMinute, 1000);
+// runAtStartOf();
+setInterval(checkForStartOfMinute, 1000);
 // runAtStartOf()
 
 // await removeDuplicates()
