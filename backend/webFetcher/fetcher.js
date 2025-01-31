@@ -4,9 +4,10 @@ import readline from 'readline';
 
 dotenv.config();
 
-const CONN_BATCH_SIZE = 10;
+const CONN_BATCH_SIZE = 100;
 const KEY = process.env.CMC_API_KEY;
-const COIN_IDS_TO_TRACK = readLineFromFile("backend/webFetcher/coins.txt", 1);
+const COINS_PATH = process.env.COINS_PATH;
+const COIN_IDS_TO_TRACK = readLineFromFile(COINS_PATH, 1);
 const PORT = process.env.PORT || 3000;
 
 
@@ -42,7 +43,7 @@ async function removeDuplicates(){
 
 async function initDB(){
 	const initialCoins = await fetchMetadata();
-	if (!initialCoins) return; // Exit early if fetch failed
+	if (!initialCoins) return; 
     
 	let numOfSuccess = 0;
 	let numOfFail = 0;
@@ -64,7 +65,7 @@ async function initDB(){
 	
 		    numOfSuccess++;
 		} catch (error) {
-		    console.error(`Error inserting coin: ${error.message}`);
+		    console.error(`Error inserting coin: ${error}`);
 		    numOfFail++;
 		}
 		
@@ -112,7 +113,7 @@ async function fetchPriceInstanceData() {
 	    const dataJson = await response.json();
 	    return generatePriceInstanceDTOs(dataJson.data);
 	} catch (error) {
-	    console.error(`Error fetching price instance data: ${error.message}`);
+	    console.error(`Error fetching price instance data: ${error}`);
 	    return null;
 	}
 }
@@ -138,7 +139,6 @@ async function insertPriceInstances(priceInstances) {
 	let successes = 0
 	let failures = 0
 	const queue = [...priceInstances]
-	const errors =[]
 
 	const processPriceInstance  = async (priceInstance)=>{
 		try {
@@ -153,16 +153,15 @@ async function insertPriceInstances(priceInstances) {
 			});
 	    
 			if (!response.ok) {
-			    throw new Error(`Failed to insert price instance for ${priceInstance.symbol}: ${response.statusText}`);
+			    throw new Error(`Failed to insert price instance for ${priceInstance.symbol}: ${response.status} ${response.statusText}`);
 			}
+
 			successes += 1;
 		} catch (error) {
-			errors.push(error)
+			console.log(`http://localhost:${PORT}/coin/priceInstance`)
+			console.error(error)
 			failures += 1;
 		}
-		// Log the current status after each request
-		readline.cursorTo(process.stdout, 0,6);
-		readline.clearLine(process.stdout, 0);
 	}
 
 	// Processing function to control concurrency
@@ -198,16 +197,13 @@ async function updateMetadata(metadatas) {
 		
 			if (!response.ok) {
 			
-				throw new Error(`METADATA: Failed to insert price instance for ${metadata.symbol}: ${response.statusText}`);
+				throw new Error(`METADATA: Failed to insert price instance for ${metadata.symbol}: ${response.status} ${response.statusText}`);
 			}
 			successes += 1
 			} catch (error) {
-				errors.push(error)
+				console.error(error)
 				failures +=1
 		}
-		// Log the current status after each request
-		readline.cursorTo(process.stdout, 0,4);
-		readline.clearLine(process.stdout, 0);
 	}
 
 	// Processing function to control concurrency
@@ -245,7 +241,7 @@ const runAtStartOf = async () => {
 const checkForStartOfHour = () => {
 	const now = new Date();
 
-	if (now.getMinutes() === 0 && now.getSeconds() === 0) {
+	if (now.getMinutes() === 0) {
 		console.log(`Time is currently ${now}`);
 		runAtStartOf();
 	}
@@ -253,7 +249,7 @@ const checkForStartOfHour = () => {
 
 const checkForStartOfMinute = () => {
 	const now = new Date();
-	if (now.getSeconds() === 0) {
+	if (now.getSeconds() === 0 && now.getMinutes()%5 === 0) {
 		try{
 			console.log(`Time is currently ${now}`);
 			runAtStartOf();
@@ -262,13 +258,7 @@ const checkForStartOfMinute = () => {
 		}
 	}
 };
-// await initDB()
-// runAtStartOf();
-setInterval(checkForStartOfMinute,1000);
-// setInterval(checkForStartOfMinute, 1000);
-// runAtStartOf()
-
-// await removeDuplicates()
+setInterval(checkForStartOfHour, 1000);
 
 
 

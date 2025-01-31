@@ -13,6 +13,7 @@ export const CoinProvider = ({ children }) => {
   const fetchCoins = async () => {
     try {
       const coins = await getAllCoins()
+      coins.sort((a, b) => b.latestPriceInstance.market_cap - a.latestPriceInstance.market_cap);
       setCoins(coins); 
     } catch (error) {
       console.error("Error fetching coins:", error);

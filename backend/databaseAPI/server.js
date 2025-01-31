@@ -10,7 +10,7 @@ import rateLimit from 'express-rate-limit';
 //custom middleware
 import { authenticate } from './middlewares/authenticate.js';
 import {errorHandler} from './middlewares/errorHandler.js'
-import { validate } from './middlewares/validate.js';
+import { validate, makeString } from './middlewares/validate.js';
 import { sanitise } from './middlewares/sanitize.js';
 import { cacheCheck, updateCache } from './middlewares/cache.js';
 
@@ -27,7 +27,7 @@ import {
 } from './constants/schemas.js'; 
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 
 // Database connection
@@ -57,22 +57,16 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 
-// built in middlewares
-const limiter = rateLimit({
-    windowMs: 1 * 60 * 1000, // 15 minutes
-    max: 1000 // limit each IP to 100 requests per windowMs
-});
-app.use(limiter);
+// // built in middlewares
+// const limiter = rateLimit({
+//     windowMs: 1 * 60 * 1000, // 15 minutes
+//     max: 1000 // limit each IP to 100 requests per windowMs
+// });
+// app.use(limiter);
 app.use(bodyParser.json());
 app.use(helmet());
-app.use(morgan('combined'));
-//logging middleware
-app.use((req, res, next) => {
-	console.log(`${req.method} ${req.url} ${req.query} ${req.body}`);
-	next(); 
-});
-app.use(errorHandler)
-
+app.use(makeString());
+// app.use(morgan('combined'));
 
 app.post('/*', authenticate());
 app.put('/*', authenticate());
@@ -163,9 +157,11 @@ app.get('/coin', validate(COIN_GET_SPECIFIC_SCHEMA), sanitise(), async (req, res
 	const { symbol} = req.query;
 	try{
 		const coin = await manager.getSpecificCoin(db, symbol)
-		console.log(coin)
 		res.status(200).send(coin)
 	}catch (error){
 		next(error);
 	}
 });
+
+app.use(errorHandler)
+
