@@ -155,8 +155,10 @@ async function insertPriceInstances(priceInstances) {
 			if (!response.ok) {
 			    throw new Error(`Failed to insert price instance for ${priceInstance.symbol}: ${response.status} ${response.statusText}`);
 			}
+
 			successes += 1;
 		} catch (error) {
+			console.log(`http://localhost:${PORT}/coin/priceInstance`)
 			console.error(error)
 			failures += 1;
 		}
