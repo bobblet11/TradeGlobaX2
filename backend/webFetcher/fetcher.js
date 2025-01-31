@@ -253,7 +253,7 @@ const checkForStartOfHour = () => {
 
 const checkForStartOfMinute = () => {
 	const now = new Date();
-	if (now.getSeconds() === 0) {
+	if (now.getSeconds() === 0 && now.getMinutes()%5 === 0) {
 		try{
 			console.log(`Time is currently ${now}`);
 			runAtStartOf();
