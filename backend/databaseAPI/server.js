@@ -48,7 +48,7 @@ connectToDatabase();
 
 
 const corsOptions = {
-	origin: `${process.env.SITE_ORIGIN}`,// Allow only this origin
+	origin: `*`,// Allow only this origin
 	methods: 'GET,PUT,POST', // Allowed HTTP methods
 	preflightContinue: false, // Pass the CORS preflight response to the next handler
 	optionsSuccessStatus: 204, // Respond with 204 for successful OPTIONS requests
@@ -57,12 +57,12 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 
-// built in middlewares
-const limiter = rateLimit({
-    windowMs: 1 * 60 * 1000, // 15 minutes
-    max: 1000 // limit each IP to 100 requests per windowMs
-});
-app.use(limiter);
+// // built in middlewares
+// const limiter = rateLimit({
+//     windowMs: 1 * 60 * 1000, // 15 minutes
+//     max: 1000 // limit each IP to 100 requests per windowMs
+// });
+// app.use(limiter);
 app.use(bodyParser.json());
 app.use(helmet());
 app.use(morgan('combined'));
