@@ -4,7 +4,7 @@ import readline from 'readline';
 
 dotenv.config();
 
-const CONN_BATCH_SIZE = 100;
+const CONN_BATCH_SIZE = 10;
 const KEY = process.env.CMC_API_KEY;
 const COIN_IDS_TO_TRACK = readLineFromFile("backend/webFetcher/coins.txt", 1);
 const PORT = process.env.PORT || 3000;
@@ -163,7 +163,6 @@ async function insertPriceInstances(priceInstances) {
 		// Log the current status after each request
 		readline.cursorTo(process.stdout, 0,6);
 		readline.clearLine(process.stdout, 0);
-		console.log(`Requests success: ${successes}, Fail: ${failures}`);
 	}
 
 	// Processing function to control concurrency
@@ -177,7 +176,7 @@ async function insertPriceInstances(priceInstances) {
 
 	// Start processing the queue
 	await processQueue();
-	console.log(`Final Requests success: ${successes}, Fail: ${failures}`);
+	console.log(`PRICE INSTANCE: Final Requests success: ${successes}, Fail: ${failures}`);
 }
 
 async function updateMetadata(metadatas) {
@@ -199,7 +198,7 @@ async function updateMetadata(metadatas) {
 		
 			if (!response.ok) {
 			
-				throw new Error(`Failed to insert price instance for ${metadata.symbol}: ${response.statusText}`);
+				throw new Error(`METADATA: Failed to insert price instance for ${metadata.symbol}: ${response.statusText}`);
 			}
 			successes += 1
 			} catch (error) {
@@ -209,7 +208,6 @@ async function updateMetadata(metadatas) {
 		// Log the current status after each request
 		readline.cursorTo(process.stdout, 0,4);
 		readline.clearLine(process.stdout, 0);
-		console.log(`Requests success: ${successes}, Fail: ${failures}`);
 	}
 
 	// Processing function to control concurrency
@@ -223,7 +221,7 @@ async function updateMetadata(metadatas) {
 
 	// Start processing the queue
 	await processQueue();
-	console.log(`Final Requests success: ${successes}, Fail: ${failures}`);
+	console.log(`METADATA: Final Requests success: ${successes}, Fail: ${failures}`);
 }
 
 
@@ -234,7 +232,7 @@ const runAtStartOf = async () => {
 	if (metadatas){
 		await updateMetadata(metadatas);
 	}
-
+	
 	const priceInstances = await fetchPriceInstanceData();
 	console.log("inserting prices")
 	if (priceInstances) {
