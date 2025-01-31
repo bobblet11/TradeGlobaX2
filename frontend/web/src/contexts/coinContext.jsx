@@ -33,7 +33,7 @@ export const CoinProvider = ({ children }) => {
   }, []);
 
   return (
-    <CoinContext.Provider value={{ coins }}>
+    <CoinContext.Provider value={{ coins, setCoins}}>
       {children}
     </CoinContext.Provider>
   );

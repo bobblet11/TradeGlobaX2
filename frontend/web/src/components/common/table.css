@@ -4,6 +4,30 @@
   margin: auto; /* Center the article */
 }
 
+.table-header button{
+  background-color: rgba(0,0,0,0);
+  color: black;
+  border: none; /* No border */
+  padding: 4px 4px; /* Padding for better touch area */
+  text-align: center; /* Center the text */
+  text-decoration: none; /* Remove underline */
+  display: inline-block; /* Allow padding and margin */
+  font-size: 1rem; /* Font size */
+  cursor: pointer; /* Pointer cursor on hover */
+  border-radius: 4px; /* Rounded corners */
+  transition: background-color 0.3s, color 0.3s; /* Smooth transition */
+  font-weight: 600  ;
+}
+
+.table-header button:hover {
+  background-color: #0011ff; /* Darker green on hover */
+  color:rgb(255, 255, 255);
+}
+
+.table-header button:focus {
+  outline: none; /* Remove outline on focus */
+}
+
 table {
   width: 100%; /* Full width of the container */
   border-collapse: collapse; /* Collapse borders for a cleaner look */
