@@ -223,12 +223,12 @@ async function updateMetadata(metadatas) {
 
 const runAtStartOf = async () => {
 	console.log('Running task at :', new Date().toISOString());
-	// const metadatas = await fetchMetadata();
+	const metadatas = await fetchMetadata();
 	const priceInstances = await fetchPriceInstanceData();
-	// console.log("updating METADATA")
-	// if (metadatas){
-	// 	await updateMetadata(metadatas);
-	// }
+	console.log("updating METADATA")
+	if (metadatas){
+		await updateMetadata(metadatas);
+	}
 
 	console.log("inserting prices")
 	if (priceInstances) {
@@ -241,7 +241,7 @@ const runAtStartOf = async () => {
 const checkForStartOfHour = () => {
 	const now = new Date();
 
-	if (now.getMinutes() === 0 && now.getSeconds() === 0) {
+	if (now.getMinutes() === 0) {
 		console.log(`Time is currently ${now}`);
 		runAtStartOf();
 	}
@@ -258,13 +258,7 @@ const checkForStartOfMinute = () => {
 		}
 	}
 };
-// await initDB()
-// runAtStartOf();
-// runAtStartOf();
-setInterval(checkForStartOfMinute, 1000);
-// runAtStartOf()
-
-// await removeDuplicates()
+setInterval(checkForStartOfHour, 1000);
 
 
 
