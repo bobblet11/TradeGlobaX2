@@ -228,12 +228,12 @@ async function updateMetadata(metadatas) {
 const runAtStartOf = async () => {
 	console.log('Running task at :', new Date().toISOString());
 	const metadatas = await fetchMetadata();
+	const priceInstances = await fetchPriceInstanceData();
 	console.log("updating METADATA")
 	if (metadatas){
 		await updateMetadata(metadatas);
 	}
-	
-	const priceInstances = await fetchPriceInstanceData();
+
 	console.log("inserting prices")
 	if (priceInstances) {
 	    await insertPriceInstances(priceInstances);
