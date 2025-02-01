@@ -94,6 +94,10 @@ async function fetchMetadata() {
             headers: { "X-CMC_PRO_API_KEY": KEY },
         });
 
+	if (!response.ok()){
+		throw new Error({message: `response from coinMarketCap was NOT okay. ${response.status} ${response.statusText} ${response.json()}`})
+	}
+
         const dataJson = await response.json();
         return generateCoinMetadataDTOs(dataJson.data);
     } catch (error) {
@@ -120,9 +124,13 @@ async function fetchPriceInstanceData() {
 		method: "GET",
 		headers: { "X-CMC_PRO_API_KEY": KEY },
 	    });
-    
+
+	    if (!response.ok()){
+		throw new Error({message: `response from coinMarketCap was NOT okay. ${response.status} ${response.statusText} ${response.json()}`})
+		}
 	    const dataJson = await response.json();
 	    return generatePriceInstanceDTOs(dataJson.data);
+
 	} catch (error) {
 	    console.error(`Error fetching price instance data: ${error}`);
 	    return null;
@@ -261,6 +269,7 @@ async function reloadWebsite() {
 
 }
 
+let sent = false
 
 const checkForStartOfHour = () => {
 	const now = new Date();
@@ -270,12 +279,17 @@ const checkForStartOfHour = () => {
 	}
 
 	if (now.getMinutes() === 0) {
-		try{
-			console.log(`Time is currently GMT+0: ${now} GMT+8:${now.toLocaleString('en-US', options)}`);
-			runAtStartOf();
-		}catch(error){
-			console.error(error)
-		}
+		if (!sent){
+			try{
+				console.log(`Time is currently GMT+0: ${now} GMT+8:${now.toLocaleString('en-US', options)}`);
+				runAtStartOf();
+				sent = true;
+			}catch(error){
+				console.error(error)
+			}
+		}	
+	}else{
+		sent = false
 	}
 };
 
