@@ -245,8 +245,12 @@ const checkForStartOfHour = () => {
 	}
 
 	if (now.getMinutes() === 0) {
-		console.log(`Time is currently ${now}`);
-		runAtStartOf();
+		try{
+			console.log(`Time is currently ${now}`);
+			runAtStartOf();
+		}catch(error){
+			console.error(error)
+		}
 	}
 };
 
