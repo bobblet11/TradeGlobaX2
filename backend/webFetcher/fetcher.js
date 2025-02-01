@@ -10,7 +10,18 @@ const COINS_PATH = process.env.COINS_PATH;
 const COIN_IDS_TO_TRACK = readLineFromFile(COINS_PATH, 1);
 const PORT = process.env.PORT || 3000;
 
+const options = {
+	timeZone: 'Asia/Hong_Kong',
+	year: 'numeric',
+	month: '2-digit',
+	day: '2-digit',
+	hour: '2-digit',
+	minute: '2-digit',
+	second: '2-digit',
+	hour12: false // Set to true for 12-hour format
+    };
 
+    
 function readLineFromFile(filePath, lineNumber) {
 	const data = fs.readFileSync(filePath, 'utf8');
 	const lines = data.split('\n');
@@ -241,12 +252,12 @@ const runAtStartOf = async () => {
 const checkForStartOfHour = () => {
 	const now = new Date();
 	if (now.getSeconds() === 0) {
-		console.log(`Time is currently ${now}`);
+		console.log(`Time is currently ${now.toLocaleString('en-US', options)}`);
 	}
 
 	if (now.getMinutes() === 0) {
 		try{
-			console.log(`Time is currently ${now}`);
+			console.log(`Time is currently ${now.toLocaleString('en-US', options)}`);
 			runAtStartOf();
 		}catch(error){
 			console.error(error)
@@ -258,7 +269,7 @@ const checkForStartOfMinute = () => {
 	const now = new Date();
 	if (now.getSeconds() === 0 && now.getMinutes()%5 === 0) {
 		try{
-			console.log(`Time is currently ${now}`);
+			console.log(`Time is currently ${now.toLocaleString('en-US', options)}`);
 			runAtStartOf();
 		}catch(err){
 			console.error(err)
