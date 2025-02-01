@@ -94,7 +94,7 @@ async function fetchMetadata() {
             headers: { "X-CMC_PRO_API_KEY": KEY },
         });
 
-	if (!response.ok()){
+	if (!response.ok){
 		throw new Error({message: `response from coinMarketCap was NOT okay. ${response.status} ${response.statusText} ${response.json()}`})
 	}
 
@@ -125,7 +125,7 @@ async function fetchPriceInstanceData() {
 		headers: { "X-CMC_PRO_API_KEY": KEY },
 	    });
 
-	    if (!response.ok()){
+	    if (!response.ok){
 		throw new Error({message: `response from coinMarketCap was NOT okay. ${response.status} ${response.statusText} ${response.json()}`})
 		}
 	    const dataJson = await response.json();
