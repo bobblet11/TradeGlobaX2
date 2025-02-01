@@ -193,7 +193,6 @@ async function updateMetadata(metadatas) {
 	let successes = 0
 	let failures = 0
 	const queue = [...metadatas]
-	const errors = []
 
 	const processMetadata = async (metadata)=>{
 		try {
@@ -240,7 +239,6 @@ const runAtStartOf = async () => {
 	if (metadatas){
 		await updateMetadata(metadatas);
 	}
-
 	console.log("inserting prices")
 	if (priceInstances) {
 	    await insertPriceInstances(priceInstances);
@@ -248,16 +246,32 @@ const runAtStartOf = async () => {
 };
 
 
+const RenderURL = `https://cors-anywhere-pnd9.onrender.com`; // Replace with your Render URL
+
+//Reloader Function
+async function reloadWebsite() {
+	try{
+		const ping = await fetch(RenderURL+"/coin/metadata?symbol=BTC", {
+			method: "GET",
+		});
+	}catch(error){
+		console.log("PING FAIL")
+		console.error(error)
+	}	
+
+}
+
 
 const checkForStartOfHour = () => {
 	const now = new Date();
 	if (now.getSeconds() === 0) {
 		console.log(`Time is currently ${now.toLocaleString('en-US', options)}`);
+		reloadWebsite()
 	}
 
 	if (now.getMinutes() === 0) {
 		try{
-			console.log(`Time is currently ${now.toLocaleString('en-US', options)}`);
+			console.log(`Time is currently GMT+0: ${now} GMT+8:${now.toLocaleString('en-US', options)}`);
 			runAtStartOf();
 		}catch(error){
 			console.error(error)
@@ -276,6 +290,7 @@ const checkForStartOfMinute = () => {
 		}
 	}
 };
+
 setInterval(checkForStartOfHour, 1000);
 
 
