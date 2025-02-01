@@ -240,6 +240,9 @@ const runAtStartOf = async () => {
 
 const checkForStartOfHour = () => {
 	const now = new Date();
+	if (now.getSeconds() === 0) {
+		console.log(`Time is currently ${now}`);
+	}
 
 	if (now.getMinutes() === 0) {
 		console.log(`Time is currently ${now}`);
