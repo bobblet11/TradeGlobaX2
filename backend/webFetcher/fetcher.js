@@ -336,7 +336,7 @@ const checkForStartOfHour = () => {
 	const now = new Date();
 	if (now.getSeconds() === 0) {
 		console.log(`Time is currently ${now.toLocaleString('en-US', options)}`);
-		// reloadWebsite()
+		reloadWebsite()
 	}
 
 	if (now.getMinutes() === 0) {
