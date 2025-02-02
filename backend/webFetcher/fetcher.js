@@ -5,10 +5,13 @@ import readline from 'readline';
 dotenv.config();
 
 const CONN_BATCH_SIZE = 100;
+const RETRY_LIMIT = 3; // Number of retry attempts
+const RETRY_DELAY = 1000; // Initial delay for retries in ms
 const KEY = process.env.CMC_API_KEY;
 const COINS_PATH = process.env.COINS_PATH;
-const COIN_IDS_TO_TRACK = readLineFromFile(COINS_PATH, 1);
 const PORT = process.env.PORT || 3000;
+
+const COIN_IDS_TO_TRACK = safeReadLineFromFile(COINS_PATH, 1);
 
 const options = {
 	timeZone: 'Asia/Hong_Kong',
@@ -19,19 +22,74 @@ const options = {
 	minute: '2-digit',
 	second: '2-digit',
 	hour12: false // Set to true for 12-hour format
-    };
+};
 
-    
-function readLineFromFile(filePath, lineNumber) {
-	const data = fs.readFileSync(filePath, 'utf8');
-	const lines = data.split('\n');
-	
-	if (lineNumber < 1 || lineNumber > lines.length) {
-	    throw new Error(`Line number ${lineNumber} is out of range.`);
+// Custom Error Types
+class APIError extends Error {
+	constructor(message, statusCode, response) {
+	  super(message);
+	  this.name = "APIError";
+	  this.statusCode = statusCode;
+	  this.response = response;
 	}
-	
-	return lines[lineNumber - 1].trim(); // Trim whitespace
+      }
+      
+      class NetworkError extends Error {
+	constructor(message) {
+	  super(message);
+	  this.name = "NetworkError";
+	}
+      }
+      
+      class FileError extends Error {
+	constructor(message) {
+	  super(message);
+	  this.name = "FileError";
+	}
 }
+
+// Utility: Centralized error logging
+function logError(error) {
+	console.error(`[${new Date().toISOString()}] ${error.name}: ${error.message}`);
+	if (error.stack) console.error(error.stack);
+	if (error.response) console.error(`Response: ${JSON.stringify(error.response)}`);
+}
+
+// Utility: Retry logic with exponential backoff
+async function withRetry(fn, args = [], retries = RETRY_LIMIT, delay = RETRY_DELAY) {
+	let attempt = 0;
+      
+	while (attempt < retries) {
+	  try {
+	    return await fn(...args);
+	  } catch (error) {
+	    attempt++;
+	    if (attempt >= retries) {
+	      throw error; // Rethrow after exhausting retries
+	    }
+	    logError(error);
+	    console.log(`Retrying (${attempt}/${retries}) in ${delay}ms...`);
+	    await new Promise((resolve) => setTimeout(resolve, delay));
+	    delay *= 2; // Exponential backoff
+	  }
+	}
+}
+    
+// File reading with error handling
+function safeReadLineFromFile(filePath, lineNumber) {
+	try {
+	  const data = fs.readFileSync(filePath, "utf8");
+	  const lines = data.split("\n");
+	  if (lineNumber < 1 || lineNumber > lines.length) {
+	    throw new FileError(`Line number ${lineNumber} is out of range.`);
+	  }
+	  return lines[lineNumber - 1].trim();
+	} catch (error) {
+	  logError(error);
+	  throw new FileError(`Failed to read file: ${filePath}`);
+	}
+      }
+      
 
 async function removeDuplicates(){
 	const response = await fetch(`https://pro-api.coinmarketcap.com/v2/cryptocurrency/info?id=${COIN_IDS_TO_TRACK}`, {
@@ -86,25 +144,28 @@ async function initDB(){
 	    }
 }
 
+// Fetch metadata and implement retry logic
 async function fetchMetadata() {
-    console.log("Fetching coin info for 1000 coins...");
-    try {
-        const response = await fetch(`https://pro-api.coinmarketcap.com/v2/cryptocurrency/info?id=${COIN_IDS_TO_TRACK}`, {
-            method: "GET",
-            headers: { "X-CMC_PRO_API_KEY": KEY },
-        });
-
-	if (!response.ok){
-		throw new Error({message: `response from coinMarketCap was NOT okay. ${response.status} ${response.statusText} ${response.json()}`})
-	}
-
-        const dataJson = await response.json();
-        return generateCoinMetadataDTOs(dataJson.data);
-    } catch (error) {
-        console.error(`Error fetching initial data: ${error.message}`);
-        return null;
-    }
+	console.log("Fetching coin info for 1000 coins...");
+	return withRetry(async () => {
+	  const response = await fetch(`https://pro-api.coinmarketcap.com/v2/cryptocurrency/info?id=${COIN_IDS_TO_TRACK}`, {
+	    method: "GET",
+	    headers: { "X-CMC_PRO_API_KEY": KEY },
+	  });
+      
+	  if (!response.ok) {
+	    throw new APIError(
+	      `Failed to fetch metadata: ${response.status} ${response.statusText}`,
+	      response.status,
+	      await response.json()
+	    );
+	  }
+      
+	  const dataJson = await response.json();
+	  return generateCoinMetadataDTOs(dataJson.data);
+	});
 }
+      
 
 async function generateCoinMetadataDTOs(dataJson) {
     return Object.entries(dataJson).map(([key, coin]) => ({
@@ -154,86 +215,85 @@ async function generatePriceInstanceDTOs(dataJson) {
 	}));
 }
 
+// Insert price instances with retry logic
 async function insertPriceInstances(priceInstances) {
-	let successes = 0
-	let failures = 0
-	const queue = [...priceInstances]
-
-	const processPriceInstance  = async (priceInstance)=>{
-		try {
-			const response = await fetch(`http://localhost:${PORT}/coin/priceInstance`, {
-			    method: "POST",
-			    headers: { 
-				'Content-Type': 'application/json',
-				"X-API-Key": process.env.DAPI_API_KEY
-			     },
-			    body: JSON.stringify(priceInstance),
-
-			});
-	    
-			if (!response.ok) {
-			    throw new Error(`Failed to insert price instance for ${priceInstance.symbol}: ${response.status} ${response.statusText}`);
-			}
-
-			successes += 1;
-		} catch (error) {
-			console.log(`http://localhost:${PORT}/coin/priceInstance`)
-			console.error(error)
-			failures += 1;
-		}
-	}
-
-	// Processing function to control concurrency
-	const processQueue = async () => {
-		while (queue.length > 0) {
-		    // Slice the queue to get the next batch of requests
-		    const batch = queue.splice(0, CONN_BATCH_SIZE);
-		    await Promise.all(batch.map(processPriceInstance));
-		}
+	let successes = 0;
+	let failures = 0;
+	const queue = [...priceInstances];
+      
+	const processPriceInstance = async (priceInstance) => {
+	  return withRetry(async () => {
+	    const response = await fetch(`http://localhost:${PORT}/coin/priceInstance`, {
+	      method: "POST",
+	      headers: {
+		"Content-Type": "application/json",
+		"X-API-Key": process.env.DAPI_API_KEY,
+	      },
+	      body: JSON.stringify(priceInstance),
+	    });
+      
+	    if (!response.ok) {
+	      throw new APIError(
+		`Failed to insert price instance for ${priceInstance.symbol}`,
+		response.status,
+		await response.json()
+	      );
+	    }
+	    successes++;
+	  }, [], RETRY_LIMIT);
 	};
-
-	// Start processing the queue
+      
+	const processQueue = async () => {
+	  while (queue.length > 0) {
+	    const batch = queue.splice(0, CONN_BATCH_SIZE);
+	    await Promise.all(batch.map(processPriceInstance)).catch((error) => {
+	      logError(error);
+	      failures += batch.length;
+	    });
+	  }
+	};
+      
 	await processQueue();
 	console.log(`PRICE INSTANCE: Final Requests success: ${successes}, Fail: ${failures}`);
 }
 
 async function updateMetadata(metadatas) {
-	let successes = 0
-	let failures = 0
-	const queue = [...metadatas]
-
-	const processMetadata = async (metadata)=>{
-		try {
-			const response = await fetch(`http://localhost:${PORT}/coin/metadata`, {
-				method: "PUT",
-				headers: { 
-					'Content-Type': 'application/json',
-					"X-API-Key": process.env.DAPI_API_KEY
-				},
-				body: JSON.stringify(metadata),
-			});
-		
-			if (!response.ok) {
-			
-				throw new Error(`METADATA: Failed to insert price instance for ${metadata.symbol}: ${response.status} ${response.statusText}`);
-			}
-			successes += 1
-			} catch (error) {
-				console.error(error)
-				failures +=1
-		}
-	}
-
-	// Processing function to control concurrency
-	const processQueue = async () => {
-		while (queue.length > 0) {
-		    // Slice the queue to get the next batch of requests
-		    const batch = queue.splice(0, CONN_BATCH_SIZE);
-		    await Promise.all(batch.map(processMetadata));
-		}
+	let successes = 0;
+	let failures = 0;
+	const queue = [...metadatas];
+      
+	const processMetadata = async (metadata) => {
+	  return withRetry(async () => {
+	    const response = await fetch(`http://localhost:${PORT}/coin/metadata`, {
+	      method: "PUT",
+	      headers: {
+		"Content-Type": "application/json",
+		"X-API-Key": process.env.DAPI_API_KEY,
+	      },
+	      body: JSON.stringify(metadata),
+	    });
+      
+	    if (!response.ok) {
+	      throw new APIError(
+		`Failed to insert price instance for ${metadata.symbol}`,
+		response.status,
+		await response.json()
+	      );
+	    }
+	    successes++;
+	  }, [], RETRY_LIMIT);
 	};
-
-	// Start processing the queue
+      
+	const processQueue = async () => {
+	  while (queue.length > 0) {
+	    const batch = queue.splice(0, CONN_BATCH_SIZE);
+	    await Promise.all(batch.map(processMetadata)).catch((error) => {
+	      logError(error);
+	      failures += batch.length;
+	    });
+	  }
+	};
+      
 	await processQueue();
 	console.log(`METADATA: Final Requests success: ${successes}, Fail: ${failures}`);
 }
@@ -241,13 +301,13 @@ async function updateMetadata(metadatas) {
 
 const runAtStartOf = async () => {
 	console.log('Running task at :', new Date().toISOString());
-	// const metadatas = await fetchMetadata();
+	const metadatas = await fetchMetadata();
 	const priceInstances = await fetchPriceInstanceData();
 
-	// console.log("updating METADATA")
-	// if (metadatas){
-	// 	await updateMetadata(metadatas);
-	// }
+	console.log("updating METADATA")
+	if (metadatas){
+		await updateMetadata(metadatas);
+	}
 	console.log("inserting prices")
 	if (priceInstances) {
 	    await insertPriceInstances(priceInstances);
@@ -276,37 +336,20 @@ const checkForStartOfHour = () => {
 	const now = new Date();
 	if (now.getSeconds() === 0) {
 		console.log(`Time is currently ${now.toLocaleString('en-US', options)}`);
-		reloadWebsite()
+		// reloadWebsite()
 	}
 
 	if (now.getMinutes() === 0) {
 		if (!sent){
-			try{
-				console.log(`Time is currently GMT+0: ${now} GMT+8:${now.toLocaleString('en-US', options)}`);
-				runAtStartOf();
-				sent = true;
-			}catch(error){
-				console.error(error)
-			}
+			console.log(`Time is currently GMT+0: ${now} GMT+8:${now.toLocaleString('en-US', options)}`);
+			runAtStartOf().catch(logError);
+			sent = true;
 		}	
 	}else{
 		sent = false
 	}
 };
 
-const checkForStartOfMinute = () => {
-	const now = new Date();
-	if (now.getSeconds() === 0 && now.getMinutes()%5 === 0) {
-		try{
-			console.log(`Time is currently ${now.toLocaleString('en-US', options)}`);
-			runAtStartOf();
-		}catch(err){
-			console.error(err)
-		}
-	}
-};
-
-setInterval(checkForStartOfHour, 1000);
-
+runAtStartOf()
 
 
