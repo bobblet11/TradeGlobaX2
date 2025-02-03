@@ -17,31 +17,35 @@ export const log = (name, message) => {
 }
 
 export const logError = (error) => {
-	const errorDetails = {
-		timestamp: new Date().toLocaleString('en-US', timeOptions),
-		message: error.message,
-		name: error.name,
-		stack: error.stack || 'N/A',
-	};
+	const timestamp = new Date().toLocaleString('en-US', timeOptions)
 
 	if (error instanceof APIError) {
-		errorDetails.statusCode = error.statusCode;
-		errorDetails.response = error.response ? JSON.stringify(error.response, null, 2) : 'N/A';
+		console.error('\n\n--- API Error Occurred ---');
+		console.error(`Timestamp: ${timestamp}`);
+		console.error(`Name: ${error.name}`);
+		console.error(`Message: ${error.message}`);
+		console.error(`Status Code: ${error.statusCode || 'N/A'}`);
+		console.error(`Method: ${error.method}`);
+		console.error(`URL: ${error.url}`);
+		console.error(`Body: ${JSON.stringify(error.body)}`);
+		console.error(`Response: ${error.response ? JSON.stringify(error.response, null, 2) : 'N/A'}`);
+		console.error(`Stack Trace: ${error.stack || 'N/A'}`);
 	} else if (error instanceof NetworkError) {
-		errorDetails.details = 'A network error occurred.';
+		console.error('\n\n--- Network Error Occurred ---');
+		console.error(`Timestamp: ${timestamp}`);
+		console.error(`Attempted Fetch URL: ${error.url}`);
+		console.error(`Message: ${error.message}`);
+		console.error(`Stack Trace: ${error.stack || 'N/A'}`);
 	} else if (error instanceof FileError) {
-		errorDetails.details = 'A file handling error occurred.';
+		console.error('\n\n--- File Error Occurred ---');
+		console.error(`Timestamp: ${timestamp}`);
+		console.error(`Message: ${error.message}`);
+		console.error(`Stack Trace: ${error.stack || 'N/A'}`);
 	} else {
-		errorDetails.details = 'An unknown error occurred.';
+		console.error('\n\n--- Unknown Error Occurred ---');
+		console.error(`Timestamp: ${timestamp}`);
+		console.error(`Message: ${error.message}`);
+		console.error(`Stack Trace: ${error.stack || 'N/A'}`);
 	}
-
-	console.error('\n\n--- Error Details ---');
-	console.error(`Timestamp: ${errorDetails.timestamp}`);
-	console.error(`Name: ${errorDetails.name}`);
-	console.error(`Message: ${errorDetails.message}`);
-	console.error(`Status Code: ${errorDetails.statusCode || 'N/A'}`);
-	console.error(`Response: ${errorDetails.response || 'N/A'}`);
-	console.error(`Details: ${errorDetails.details || 'N/A'}`);
-	console.error(`Stack Trace: ${errorDetails.stack}`);
 	console.error('---------------------\n\n');
 }

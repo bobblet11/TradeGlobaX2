@@ -1,8 +1,11 @@
-import { DB_API_KEY, DB_API_PORT } from "./config.js";
+import { ROOT_URL, DB_API_KEY, DB_API_PORT } from "./config.js";
 import { RETRY_DELAY,  RETRY_LIMIT } from "./config.js";
+import { CONN_BATCH_SIZE } from "./config.js";
+import { APIError, NetworkError } from "./errorHandling.js";
 import { logError, log } from "./logger.js";
 
-async function withRetry(callback, args = [], retries = RETRY_LIMIT, delay = RETRY_DELAY) {
+
+export async function withRetry(callback, args = [], retries = RETRY_LIMIT, delay = RETRY_DELAY) {
 	let attempt = 0;
       
 	while (attempt < retries) {
@@ -13,8 +16,6 @@ async function withRetry(callback, args = [], retries = RETRY_LIMIT, delay = RET
 			if (attempt >= retries) {
 				throw error;
 			}
-
-			logError(error)
 			log('Request', `Retrying (${attempt}/${retries}) in ${delay}ms...`)
 			await new Promise((resolve) => setTimeout(resolve, delay));
 			delay *= 2;
@@ -26,7 +27,7 @@ async function withRetry(callback, args = [], retries = RETRY_LIMIT, delay = RET
 const processRequest = async ( method, path, body) => {
 	return withRetry(
 		async () => {
-	  		const response = await fetch(`http://localhost:${DB_API_PORT}${path}`, {
+	  		const response = await fetch(`${ROOT_URL}:${DB_API_PORT}${path}`, {
 	    		method: method,
 			headers: {
 				"Content-Type": "application/json",
@@ -37,27 +38,32 @@ const processRequest = async ( method, path, body) => {
 	
 		if (!response.ok) {
 			throw new APIError(
-				`Failed to insert price instance for ${priceInstance.symbol}\nREASON: ${response.statusText}`,
+				`Failed Request`,
 				response.status,
-				await response.json()
+				await response.json(),
+				`${ROOT_URL}:${DB_API_PORT}${path}`,
+				body,
+				method
 			);
 		}
-	  
-		successes++;
 	}, [], RETRY_LIMIT);
 };
 
 export const processQueue = async (queue, method, path) => {
+	let failures = 0;
 	while (queue.length > 0) {
 		const batch = queue.splice(0, CONN_BATCH_SIZE);
 		    await Promise.all(
 			batch.map(
 				coin => processRequest( method, path, coin))
 			).catch((error) => {
-				//will only handle errors if the retry limit is reached.
+				if (!(error instanceof APIError)){
+					error = new NetworkError(error.message, path)
+				}
 				logError(error);
-				failures += batch.length;
+				failures++;
 			}
 		);
 	}
+	return failures;
 };

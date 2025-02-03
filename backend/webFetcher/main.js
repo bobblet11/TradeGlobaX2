@@ -44,6 +44,6 @@ const checkForStartOfHour = () => {
 	}
 };
 
-setInterval(checkForStartOfHour, 1000);
+runAtStartOf();
 
 

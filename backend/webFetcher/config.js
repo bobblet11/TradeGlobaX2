@@ -14,8 +14,9 @@ export const CONN_BATCH_SIZE = 100;
 export const COINS_PATH = process.env.COINS_PATH;
 export const COIN_IDS_TO_TRACK = readLineFromFile(COINS_PATH, 1);
 
+export const ROOT_URL = process.env.ROOT_URL
 export const DB_API_PORT = process.env.PORT;
 
 //API keys for the coin market data, an access to the database
-export const MARKET_CAP_KEY = process.env.CMC_API_KEY;
+export const MARKET_CAP_API_KEY = process.env.CMC_API_KEY;
 export const DB_API_KEY = process.env.DB_API_KEY;
