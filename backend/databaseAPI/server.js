@@ -1,6 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import * as manager from './manager.js'; // Ensure to add .js extension
+import * as manager from './manager.js';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors'
