@@ -1,6 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import * as manager from './manager.js'; // Ensure to add .js extension
+import * as manager from './manager.js';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors'
@@ -25,6 +25,7 @@ import {
 	COIN_GET_SPECIFIC_SCHEMA,
 	COIN_PRICE_INSTANCE_SCHEMA
 } from './constants/schemas.js'; 
+import { ROOT_URL } from '../webFetcher/config.js';
 
 const app = express();
 const port = process.env.PORT;
@@ -37,7 +38,7 @@ const connectToDatabase = async () => {
         db = await manager.connectDB();
         app.locals.db = db; // Store the db in app.locals
         app.listen(port, () => {
-            console.log(`Server is running on http://localhost:${port}`);
+            console.log(`Server is running on ${ROOT_URL}:${port}`);
         });
     } catch (error) {
         console.error("Failed to start the server due to database connection error:", error);
@@ -63,6 +64,7 @@ app.use(cors(corsOptions));
 //     max: 1000 // limit each IP to 100 requests per windowMs
 // });
 // app.use(limiter);
+
 app.use(bodyParser.json());
 app.use(helmet());
 app.use(makeString());

@@ -39,124 +39,107 @@ export async function getPriceInstance(db, symbol, count) {
   const collection = db.collection("coin");
 
   let n = parseInt(count, 10);
-
-  try {
-    const coin = await collection.findOne(
-      { symbol },
-      {
-        projection: {
-          name: 1,
-          symbol: 1,
-          dailyMax: 1,
-          dailyMin: 1,
-          priceInstances: { $slice: -n },
-        },
-      }
-    );
-
-    if (!coin || !coin.priceInstances || coin.priceInstances.length === 0) {
-      throw new Error("No price instances found for this coin.");
+  const coin = await collection.findOne(
+    { symbol },
+    {
+      projection: {
+        name: 1,
+        symbol: 1,
+        dailyMax: 1,
+        dailyMin: 1,
+        priceInstances: { $slice: -n },
+      },
     }
+  );
 
-    return coin.priceInstances.reverse();
-  } catch (error) {
-    throw error; // Re-throw the error for handling in the calling function
+  if (!coin || !coin.priceInstances || coin.priceInstances.length === 0) {
+    throw new Error("No price instances found for this coin.");
   }
+
+  return coin.priceInstances.reverse();
 }
 
 export async function getSpecificCoin(db, symbol) {
   // Replace with your collection name
   const collection = db.collection("coin");
-  try {
-    const coin = await collection.findOne(
-      { symbol },
-      {
-        projection: {
-          name: 1,
-          symbol: 1,
-          description: 1,
-          logo: 1,
-          dailyMax: 1,
-          dailyMin: 1,
-          priceInstances: { $slice: -1 },
-        },
-      }
-    );
-
-    if (!coin || !coin.priceInstances || coin.priceInstances.length === 0) {
-      throw new Error("No price instances found for this coin.");
+  const coin = await collection.findOne(
+    { symbol },
+    {
+      projection: {
+        name: 1,
+        symbol: 1,
+        description: 1,
+        logo: 1,
+        dailyMax: 1,
+        dailyMin: 1,
+        priceInstances: { $slice: -1 },
+      },
     }
-    return coin;
-  } catch (error) {
-    throw error; // Re-throw the error for handling in the calling function
+  );
+
+  if (!coin || !coin.priceInstances || coin.priceInstances.length === 0) {
+    throw new Error("No price instances found for this coin.");
   }
+  return coin;
 }
 
 export async function getPriceInstanceRange(db, symbol, startDate, endDate) {
-  try {
-    const collection = db.collection("coin");
-    const result = await collection
-      .aggregate([
-        { $match: { symbol } },
-        {
-          $project: {
-            priceInstances: {
-              $filter: {
-                input: {
-                  $map: {
-                    input: "$priceInstances",
-                    as: "instance",
-                    in: {
-                      $mergeObjects: [
-                        "$$instance",
-                        {
-                          timestampDate: {
-                            $dateFromString: {
-                              dateString: "$$instance.timestamp",
-                            },
+  const collection = db.collection("coin");
+  const result = await collection
+    .aggregate([
+      { $match: { symbol } },
+      {
+        $project: {
+          priceInstances: {
+            $filter: {
+              input: {
+                $map: {
+                  input: "$priceInstances",
+                  as: "instance",
+                  in: {
+                    $mergeObjects: [
+                      "$$instance",
+                      {
+                        timestampDate: {
+                          $dateFromString: {
+                            dateString: "$$instance.timestamp",
                           },
                         },
-                      ],
-                    },
+                      },
+                    ],
                   },
                 },
-                as: "instanceWithDate",
-                cond: {
-                  $and: [
-                    {
-                      $gte: [
-                        "$$instanceWithDate.timestampDate",
-                        { $dateFromString: { dateString: startDate } }, // Convert startDate to date
-                      ],
-                    },
-                    {
-                      $lte: [
-                        "$$instanceWithDate.timestampDate",
-                        { $dateFromString: { dateString: endDate } }, // Convert endDate to date
-                      ],
-                    },
-                  ],
-                },
+              },
+              as: "instanceWithDate",
+              cond: {
+                $and: [
+                  {
+                    $gte: [
+                      "$$instanceWithDate.timestampDate",
+                      { $dateFromString: { dateString: startDate } }, // Convert startDate to date
+                    ],
+                  },
+                  {
+                    $lte: [
+                      "$$instanceWithDate.timestampDate",
+                      { $dateFromString: { dateString: endDate } }, // Convert endDate to date
+                    ],
+                  },
+                ],
               },
             },
           },
         },
-        { $match: { "priceInstances.0": { $exists: true } } }, // Ensures documents with price instances are returned
-      ])
-      .toArray();
-    if (
-      !result ||
-      result.length === 0 ||
-      result[0].priceInstances.length === 0
-    ) {
-      throw new Error(
-        "No price instances found for this coin within the specified date range."
-      );
-    }
-    return result[0].priceInstances.reverse();
-  } catch (error) {
-    throw error;
+      },
+      { $match: { "priceInstances.0": { $exists: true } } }, // Ensures documents with price instances are returned
+    ])
+    .toArray();
+  if (!result || result.length === 0 || result[0].priceInstances.length === 0) {
+    throw new Error(
+      "No price instances found for this coin within the specified date range."
+    );
   }
+  return result[0].priceInstances.reverse();
 }
 
 export async function authenticateKey(db, key) {
@@ -175,39 +158,28 @@ export async function authenticateKey(db, key) {
 export async function getCoinMetadata(db, symbol) {
   const collection = db.collection("coin");
 
-  try {
-    const coin = await collection.findOne(
-      { symbol },
-      { projection: { priceInstances: 0 } }
-    );
+  const coin = await collection.findOne(
+    { symbol },
+    { projection: { priceInstances: 0 } }
+  );
 
-    if (!coin) {
-      throw new Error("No coin found.");
-    }
-
-    return coin;
-  } catch (error) {
-    throw error;
+  if (!coin) {
+    throw new Error("No coin found.");
   }
+
+  return coin;
 }
 
 export async function insertCoin(db, coinMetadata) {
   const collection = db.collection("coin");
-
-  try {
-    const existingCoin = await collection.findOne({
-      symbol: coinMetadata.symbol,
-    });
-    if (existingCoin) {
-      throw new Error(
-        `Coin with symbol ${coinMetadata.symbol} already exists.`
-      );
-    }
-
-    const result = await collection.insertOne(coinMetadata);
-  } catch (error) {
-    throw error;
+  const existingCoin = await collection.findOne({
+    symbol: coinMetadata.symbol,
+  });
+  if (existingCoin) {
+    throw new Error(`Coin with symbol ${coinMetadata.symbol} already exists.`);
   }
+
+  const result = await collection.insertOne(coinMetadata);
 }
 
 export async function updateCoin(db, coinMetadata) {
@@ -339,87 +311,82 @@ export async function getAllCoinsWithLatestPriceInstance(db, query) {
     startCoin = parseInt(query.startCoin, 10);
     endCoin = parseInt(query.endCoin, 10);
   }
-
-  try {
-    let result = null;
-    if (startCoin !== null) {
-      result = await collection
-        .aggregate([
-          {
-            $project: {
-              symbol: 1,
-              logo: 1,
-              latestPriceInstance: {
-                $arrayElemAt: [
-                  {
-                    $sortArray: {
-                      input: "$priceInstances",
-                      sortBy: { timestamp: -1 },
-                    },
+  let result = null;
+  if (startCoin !== null) {
+    result = await collection
+      .aggregate([
+        {
+          $project: {
+            symbol: 1,
+            logo: 1,
+            latestPriceInstance: {
+              $arrayElemAt: [
+                {
+                  $sortArray: {
+                    input: "$priceInstances",
+                    sortBy: { timestamp: -1 },
                   },
-                  0,
-                ],
-              },
+                },
+                0,
+              ],
             },
           },
-          { $match: { latestPriceInstance: { $exists: true } } },
-          {
-            $addFields: {
-              marketCap: { $ifNull: ["$latestPriceInstance.market_cap", 0] }, // Extract marketCap
-            },
+        },
+        { $match: { latestPriceInstance: { $exists: true } } },
+        {
+          $addFields: {
+            marketCap: { $ifNull: ["$latestPriceInstance.market_cap", 0] }, // Extract marketCap
           },
-          { $sort: { marketCap: -1 } }, // Sort by marketCap in descending order
-          { $skip: startCoin },
-          { $limit: endCoin - startCoin },
-          {
-            $project: {
-              marketCap: 0, // Exclude marketCap from final result
-            },
+        },
+        { $sort: { marketCap: -1 } }, // Sort by marketCap in descending order
+        { $skip: startCoin },
+        { $limit: endCoin - startCoin },
+        {
+          $project: {
+            marketCap: 0, // Exclude marketCap from final result
           },
-        ])
-        .toArray();
-    } else {
-      result = await collection
-        .aggregate([
-          {
-            $project: {
-              symbol: 1,
-              logo: 1,
-              latestPriceInstance: {
-                $arrayElemAt: [
-                  {
-                    $sortArray: {
-                      input: "$priceInstances",
-                      sortBy: { timestamp: -1 },
-                    },
+        },
+      ])
+      .toArray();
+  } else {
+    result = await collection
+      .aggregate([
+        {
+          $project: {
+            symbol: 1,
+            logo: 1,
+            latestPriceInstance: {
+              $arrayElemAt: [
+                {
+                  $sortArray: {
+                    input: "$priceInstances",
+                    sortBy: { timestamp: -1 },
                   },
-                  0,
-                ],
-              },
+                },
+                0,
+              ],
             },
           },
-          { $match: { latestPriceInstance: { $exists: true } } },
-          {
-            $addFields: {
-              marketCap: { $ifNull: ["$latestPriceInstance.market_cap", 0] }, // Extract marketCap
-            },
+        },
+        { $match: { latestPriceInstance: { $exists: true } } },
+        {
+          $addFields: {
+            marketCap: { $ifNull: ["$latestPriceInstance.market_cap", 0] }, // Extract marketCap
           },
-          { $sort: { marketCap: -1 } }, // Sort by marketCap in descending order
-          {
-            $project: {
-              marketCap: 0, // Exclude marketCap from final result
-            },
+        },
+        { $sort: { marketCap: -1 } }, // Sort by marketCap in descending order
+        {
+          $project: {
+            marketCap: 0, // Exclude marketCap from final result
           },
-        ])
-        .toArray();
-    }
-
-    if (result.length === 0) {
-      throw new Error("No coins found with price instances.");
-    }
-
-    return result;
-  } catch (error) {
-    throw error;
+        },
+      ])
+      .toArray();
   }
+
+  if (result.length === 0) {
+    throw new Error("No coins found with price instances.");
+  }
+
+  return result;
 }

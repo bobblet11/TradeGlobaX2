@@ -1,22 +1,28 @@
 # TradeGlobaX
 
 ## Project Description
-A full stack web project that displays real-time financial data for over 1,000 cryptocurrencies.
+A full-stack web project that displays real-time financial data for over 1,000 cryptocurrencies. Cryptocurrency data is scraped from various APIs every hour, processed, and stored in a MongoDB cloud cluster. Backend is hosted on Render.io's cloud-based hosting service.
+  
+## Current Features
+- Scrapes real-time cryptocurrency data at hour intervals
+- Displays time series price data of cryptocurrencies at different ranges
+- Hosted on Render io
 
-## Features
-- Real-time cryptocurrency data
-- User-friendly interface
-- Price charting
+## In development
+- Hosting the react Webapp (currently in progress)
+- User accounts with authentication
+- Allow users to make mock trades with fake currency
+- Crypto portfolio dashboard
 
 ## Techstack
 ### Frontend
 - React
 - Konva
-- Chart.Js
+- Chart.js
 ### Database API
-- Express.JS
+- Express.js
 - MongoDB
-
+- Node.js
 
 ## Installation Instructions
 1. Clone the repository:
@@ -25,14 +31,20 @@ A full stack web project that displays real-time financial data for over 1,000 c
    ```
 2. Navigate into each project directory:
   ```bash
+  cd TradeGlobaX2/frontend/web
   cd TradeGlobaX2/backend/databaseAPI
   cd TradeGlobaX2/backend/webFetcher
-  cd TradeGlobaX2/frontend/web
   ```
 3. Install dependencies for each project:
   ```bash
   npm install
   ```
+## Usage Instructions
+Run the following script inside each project:
+```bash
+npm run dev
+```
+The databaseAPI and webFetcher are already hosted on render.io, the only project that needs to be run is the react webapp inside frontend/web
 
 ## Dependencies
 1. React frontend
@@ -68,13 +80,6 @@ A full stack web project that displays real-time financial data for over 1,000 c
    "dotenv": "^16.4.7",
    "fs": "^0.0.1-security",
    "readline": "^1.3.0"
-   ```
-
-
-## Usage Instructions
-each project can be executed using the following,
-   ```bash
-   npm run dev
    ```
 
 ## Contributing

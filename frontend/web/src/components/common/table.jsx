@@ -2,20 +2,51 @@ import "./table.css"
 import { useCoins } from '../../contexts/coinContext';
 import TableRow from "./tableRow";
 
-export default function Table({coins, currentPage, coinsPerPage}) {
+export default function Table({coins, sortBy, currentPage, coinsPerPage}) {
+
   	return (
 		<article className="table-container">
 			<table>
-				<thead>
+				<thead className="table-header">
 					<tr>
-						<th className="index-th">#</th>
-						<th className="name-th">Symbol</th>
-						<th className="price-th">Price</th>
-						<th className="hr-th">1h</th>
-						<th className="tf-hr-th">24h</th>
-						<th className="sd-th">7d</th>
-						<th className="tf-hr-vol-th">24h Volume</th>
-						<th className="marketcap-th">Market Cap</th>
+					<th className="index-th">
+						#
+					</th>	
+					<th className="name-th">
+						<button onClick={() => sortBy("symbol")}>
+						Symbol
+						</button>
+					</th>
+					<th className="price-th">
+						<button onClick={() => sortBy("latestPriceInstance.price")}>
+						Price
+						</button>
+					</th>
+					<th className="hr-th">
+						<button onClick={() => sortBy("latestPriceInstance.percent_change_1h")}>
+						1h
+						</button>
+					</th>
+					<th className="tf-hr-th">
+						<button onClick={() => sortBy("latestPriceInstance.percent_change_24h")}>
+						24h
+						</button>
+					</th>
+					<th className="sd-th">
+						<button onClick={() => sortBy("latestPriceInstance.percent_change_7d")}>
+						7d
+						</button>
+					</th>
+					<th className="tf-hr-vol-th">
+						<button onClick={() => sortBy("latestPriceInstance.volume_change_24h")}>
+						24h Volume
+						</button>
+					</th>
+					<th className="marketcap-th">
+						<button onClick={() => sortBy("latestPriceInstance.market_cap")}>
+						Market Cap
+						</button>
+					</th>
 					</tr>
 				</thead>
 
