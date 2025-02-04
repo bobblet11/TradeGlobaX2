@@ -23,7 +23,8 @@ import {
 	COIN_PRICE_INSTANCE_RANGE_GET_SCHEMA,
 	COIN_META_DATA_SCHEMA,
 	COIN_GET_SPECIFIC_SCHEMA,
-	COIN_PRICE_INSTANCE_SCHEMA
+	COIN_PRICE_INSTANCE_SCHEMA,
+	USER_LOGIN_SCHEMA
 } from './constants/schemas.js';
 import { ROOT_URL } from '../webFetcher/config.js';
 
@@ -160,6 +161,24 @@ app.get('/coin', validate(COIN_GET_SPECIFIC_SCHEMA), sanitise(), async (req, res
 	try {
 		const coin = await manager.getSpecificCoin(db, symbol)
 		res.status(200).send(coin)
+	} catch (error) {
+		next(error);
+	}
+});
+
+app.post('/user', validate(USER_LOGIN_SCHEMA), async (req, res, next) => {
+	try {
+		await manager.insertUser(db, req.body)
+		return res.status(201).send("successfully inserted user");
+	} catch (error) {
+		next(error);
+	}
+});
+
+app.get('/user', validate(USER_LOGIN_SCHEMA), async (req, res, next) => {
+	try {
+		const user = await manager.validateUser(db, req.query)
+		res.status(200).send(user)
 	} catch (error) {
 		next(error);
 	}

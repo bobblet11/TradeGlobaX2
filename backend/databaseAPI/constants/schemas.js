@@ -62,3 +62,8 @@ export const COIN_PRICE_INSTANCE_SCHEMA = Joi.object({
     .pattern(/^[-+]?(\d+(\.\d+)?|\.\d+)([eE][-+]?\d+)?$/)
     .required(), // Same for percent_change_7d
 });
+
+export const USER_LOGIN_SCHEMA = Joi.object({
+  username: Joi.string().required(),
+  password: Joi.string().min(8).required(),
+});
