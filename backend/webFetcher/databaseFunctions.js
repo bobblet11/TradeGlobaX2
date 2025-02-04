@@ -1,6 +1,6 @@
-import { processQueue } from "./requestUtils.js";
-import { log } from "./logger.js";
-import { fetchMetadata } from "./coinMarketAPIFunctions.js";
+import { processQueue } from "./Adapter/requestUtils.js";
+import { log } from "./Utils/logger.js";
+import { fetchMetadata } from "./Adapter/coinMarketAPIFunctions.js";
 
 export const insertPriceInstances = async (priceInstances) => {
 	const queue = [...priceInstances];
@@ -28,5 +28,5 @@ export const initialiseDatabase = async () => {
 	const initialCoins = await fetchMetadata();
 	log("Initialise Database", `Inserting ${initialCoins.length} coins into database`)
 	if (!initialCoins) return;
-    	postMetadatas(initialCoins);
+	postMetadatas(initialCoins);
 }

@@ -1,13 +1,13 @@
-import { fetchMetadata, fetchPriceInstanceData } from "./coinMarketAPIFunctions.js";
+import { fetchMetadata, fetchPriceInstanceData } from "./Adapter/coinMarketAPIFunctions.js";
 import { insertPriceInstances, putMetadatas } from "./databaseFunctions.js";
-import { log } from "./logger.js";
+import { log } from "./Utils/logger.js";
 
 const runAtStartOf = async () => {
 	log("Main", "Populating database with latest market data");
 	const metadatas = await fetchMetadata();
 	const priceInstances = await fetchPriceInstanceData();
 
-	if (metadatas){
+	if (metadatas) {
 		await putMetadatas(metadatas);
 	}
 
@@ -25,21 +25,21 @@ const checkForStartOfHour = () => {
 		log("Check for start of hour", "Time-check");
 	}
 
-	if (now.getMinutes() === 30){
-		if (!pinged){
+	if (now.getMinutes() === 30) {
+		if (!pinged) {
 			pingRender();
 			pinged = true;
 		}
-	}else{
+	} else {
 		pinged = false;
 	}
 
 	if (now.getMinutes() === 0) {
-		if (!ranScript){
+		if (!ranScript) {
 			runAtStartOf();
 			ranScript = true;
-		}	
-	}else{
+		}
+	} else {
 		ranScript = false
 	}
 };

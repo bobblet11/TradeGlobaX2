@@ -1,4 +1,4 @@
-import { APIError, NetworkError, FileError } from "./errorHandling.js";
+import { APIError, NetworkError, FileError } from "../errorHandling.js";
 
 const timeOptions = {
 	timeZone: 'Asia/Hong_Kong',

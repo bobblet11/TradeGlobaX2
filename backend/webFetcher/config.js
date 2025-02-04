@@ -1,11 +1,11 @@
 import dotenv from 'dotenv';
-import { readLineFromFile } from './fileUtils.js';
+import { readLineFromFile } from './Utils/fileUtils.js';
 
 dotenv.config();
 
 //Request retry logic constants
-export const RETRY_LIMIT = 3; 
-export const RETRY_DELAY = 1000; 
+export const RETRY_LIMIT = 3;
+export const RETRY_DELAY = 1000;
 
 //Total number of connections at any given time
 export const CONN_BATCH_SIZE = 100;
