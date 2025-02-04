@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build1":"npm install --prefix backend/webFetcher/",
-    "build2":"npm install --prefix backend/databaseAPI/",
+    "build2":"npm install --prefix backend/webServer/",
     "build3":"npm install --prefix frontend/web/",
-    "deploy1":"node backend/databaseAPI/server.js",
+    "deploy1":"node backend/webServer/server.js",
     "deploy2":"node backend/webFetcher/fetcher.js",
     "build":"npm run build1 & npm run build2 & npm run build3",
     "deploy":"npm run deploy2"
