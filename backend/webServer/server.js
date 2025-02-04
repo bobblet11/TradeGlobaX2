@@ -27,7 +27,6 @@ import {
 	USER_LOGIN,
 	USER_REGISTER
 } from './constants/schemas.js'; 
-import { ROOT_URL } from '../webFetcher/config.js';
 import { createUser, signIn } from './auth/user.js';
 import { log, logError } from './logger.js';
 import { verifyJWTToken } from './auth/token.js';

@@ -6,10 +6,11 @@
   "scripts": {
     "build1":"npm install --prefix backend/webFetcher/",
     "build2":"npm install --prefix backend/databaseAPI/",
+    "build3":"npm install --prefix frontend/web/",
     "deploy1":"node backend/databaseAPI/server.js",
     "deploy2":"node backend/webFetcher/fetcher.js",
-    "build":"npm run build1 & npm run build2",
-    "deploy":"npm run deploy1 & npm run deploy2"
+    "build":"npm run build1 & npm run build2 & npm run build3",
+    "deploy":"npm run deploy2"
   },
   "author": "",
   "license": "ISC",

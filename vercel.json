@@ -1,0 +1,6 @@
+{
+	"crons": [{
+		"path": "/backend/webFetcher/cron",
+		"schedule": "0 * * * *"
+	}]
+}
