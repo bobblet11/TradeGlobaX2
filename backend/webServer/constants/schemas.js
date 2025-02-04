@@ -1,7 +1,7 @@
 import Joi from "joi";
 
 export const COIN_META_DATA_GET_SCHEMA = Joi.object({
-  symbol: Joi.string().uppercase().min(1).required(),
+symbol: Joi.string().uppercase().min(1).required(),
 });
 
 export const COIN_ALL_GET_SCHEMA = Joi.object({
@@ -61,4 +61,15 @@ export const COIN_PRICE_INSTANCE_SCHEMA = Joi.object({
   percent_change_7d: Joi.string()
     .pattern(/^[-+]?(\d+(\.\d+)?|\.\d+)([eE][-+]?\d+)?$/)
     .required(), // Same for percent_change_7d
+});
+
+
+export const USER_LOGIN = Joi.object({
+  username: Joi.string().required(),
+  passwordHash: Joi.string().required(),
+});
+
+export const USER_REGISTER = Joi.object({
+  username: Joi.string().required(),
+  passwordHash: Joi.string().required(),
 });

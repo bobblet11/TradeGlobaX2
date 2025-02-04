@@ -23,9 +23,15 @@ import {
 	COIN_PRICE_INSTANCE_RANGE_GET_SCHEMA,
 	COIN_META_DATA_SCHEMA,
 	COIN_GET_SPECIFIC_SCHEMA,
-	COIN_PRICE_INSTANCE_SCHEMA
+	COIN_PRICE_INSTANCE_SCHEMA,
+	USER_LOGIN,
+	USER_REGISTER
 } from './constants/schemas.js'; 
 import { ROOT_URL } from '../webFetcher/config.js';
+import { createUser, signIn } from './auth/user.js';
+import { log, logError } from './logger.js';
+import { verifyJWTToken } from './auth/token.js';
+import { AuthError } from './errorHandling.js';
 
 const app = express();
 const port = process.env.PORT;
@@ -38,7 +44,7 @@ const connectToDatabase = async () => {
         db = await manager.connectDB();
         app.locals.db = db; // Store the db in app.locals
         app.listen(port, () => {
-            console.log(`Server is running on ${ROOT_URL}:${port}`);
+            console.log(`Server is running on localhost:${port}`);
         });
     } catch (error) {
         console.error("Failed to start the server due to database connection error:", error);
@@ -70,7 +76,7 @@ app.use(helmet());
 app.use(makeString());
 // app.use(morgan('combined'));
 
-app.post('/*', authenticate());
+app.post('/*');
 app.put('/*', authenticate());
 app.get('/*', async (req,res, next) => {
 	const now = new Date();
@@ -163,6 +169,47 @@ app.get('/coin', validate(COIN_GET_SPECIFIC_SCHEMA), sanitise(), async (req, res
 	}catch (error){
 		next(error);
 	}
+});
+
+app.post('/user/register', validate(USER_REGISTER), sanitise(), async (req, res, next) => {
+	//idk, add any other registration info here
+	const {username, passwordHash} = req.body;
+	try{
+		createUser(db, {username, passwordHash});
+		res.status(200).end();
+	}catch(error){
+		logError(error);
+		next(error);
+	}
+});
+
+app.post('/user/login', validate(USER_LOGIN), sanitise(), async (req, res, next) => {
+	const {username, passwordHash} = req.body;
+	try{
+		const token = await signIn(db, username, passwordHash);
+		log("server", token)
+		res.status(200).json(token);
+	}catch(error){
+		logError(error);
+		next(error);
+	}
+});
+
+app.post('/user/token/verify', sanitise(), async (req, res, next) => {
+	const authHeader = req.headers['authorization'];
+	const token = authHeader && authHeader.split(' ')[1];
+	
+	if (!token) {
+		console.error(new AuthError("No token found in headers"))
+		return res.sendStatus(401);
+	}
+
+
+	if (!verifyJWTToken(token)){
+		return res.sendStatus(403);
+	}
+
+	res.sendStatus(200);
 });
 
 app.use(errorHandler)
