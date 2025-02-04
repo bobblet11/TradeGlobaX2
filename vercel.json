@@ -1,6 +1,6 @@
 {
 	"crons": [{
 		"path": "/backend/webFetcher/cron",
-		"schedule": "0 * * * *"
+		"schedule": "0 0 * * *"
 	}]
 }
