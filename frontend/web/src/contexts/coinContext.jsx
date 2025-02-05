@@ -14,7 +14,7 @@ export const CoinProvider = ({ children }) => {
     try {
       const coins = await getAllCoins()
       coins.sort((a, b) => b.latestPriceInstance.market_cap - a.latestPriceInstance.market_cap);
-      setCoins(coins); 
+      setCoins(coins);
     } catch (error) {
       console.error("Error fetching coins:", error);
     }
@@ -33,7 +33,7 @@ export const CoinProvider = ({ children }) => {
   }, []);
 
   return (
-    <CoinContext.Provider value={{ coins, setCoins}}>
+    <CoinContext.Provider value={{ coins, setCoins }}>
       {children}
     </CoinContext.Provider>
   );

@@ -1,6 +1,6 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
 import dotenv from "dotenv";
-import { bcrypt } from "bcrypt";
+import bcrypt from "bcrypt";
 
 dotenv.config();
 const USER = process.env.DB_USER;
