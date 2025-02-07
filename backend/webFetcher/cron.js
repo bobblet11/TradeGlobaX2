@@ -1,6 +1,7 @@
 import { fetchMetadata, fetchPriceInstanceData } from "./Utils/coinMarketAPIFunctions.js";
 import { insertPriceInstances, putMetadatas } from "./databaseFunctions.js";
 import { log } from "../logger.js";
+import cron from 'node-cron';
 
 const runAtStartOf = async () => {
 	log("Main", "Populating database with latest market data");
@@ -16,34 +17,18 @@ const runAtStartOf = async () => {
 	}
 };
 
-let ranScript = false;
-let pinged = false;
 
-const checkForStartOfHour = () => {
-	const now = new Date();
-	if (now.getSeconds() === 0) {
-		log("Check for start of hour", "Time-check");
+// Schedule a task to run every hr
+const job = cron.schedule('0 * * * *', () => {
+	log("Check for start of hour", "-");
+	try{
+		runAtStartOf();
+	}catch(error){
+		console.error(error)
 	}
 
-	if (now.getMinutes() === 30) {
-		if (!pinged) {
-			pingRender();
-			pinged = true;
-		}
-	} else {
-		pinged = false;
-	}
+});
 
-	if (now.getMinutes() === 0) {
-		if (!ranScript) {
-			runAtStartOf();
-			ranScript = true;
-		}
-	} else {
-		ranScript = false
-	}
-};
-
-runAtStartOf();
+job.start();
 
 
