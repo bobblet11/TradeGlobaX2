@@ -24,10 +24,9 @@ import {
 	COIN_META_DATA_SCHEMA,
 	COIN_GET_SPECIFIC_SCHEMA,
 	COIN_PRICE_INSTANCE_SCHEMA,
-	USER_LOGIN,
-	USER_REGISTER
+	USER_LOGIN_SCHEMA
 } from './constants/schemas.js';
-import { createUser, signIn } from './auth/user.js';
+import { signUp, signIn } from './auth/user.js';
 import { log, logError } from './logger.js';
 import { verifyJWTToken } from './auth/token.js';
 import { AuthError } from './errorHandling.js';
@@ -170,29 +169,11 @@ app.get('/coin', validate(COIN_GET_SPECIFIC_SCHEMA), sanitise(), async (req, res
 	}
 });
 
-app.post('/user', validate(USER_LOGIN_SCHEMA), async (req, res, next) => {
-	try {
-		await manager.insertUser(db, req.body)
-		return res.status(201).send("successfully inserted user");
-	} catch (error) {
-		next(error);
-	}
-});
-
-app.get('/user', validate(USER_LOGIN_SCHEMA), async (req, res, next) => {
-	try {
-		const user = await manager.validateUser(db, req.query)
-		res.status(200).send(user)
-	} catch (error) {
-		next(error);
-	}
-});
-
-app.post('/user/register', validate(USER_REGISTER), sanitise(), async (req, res, next) => {
+app.post('/user/register', validate(USER_LOGIN_SCHEMA), sanitise(), async (req, res, next) => {
 	//idk, add any other registration info here
 	const { username, passwordHash } = req.body;
 	try {
-		createUser(db, { username, passwordHash });
+		signUp(db, { username, passwordHash });
 		res.status(200).end();
 	} catch (error) {
 		logError(error);
@@ -200,7 +181,7 @@ app.post('/user/register', validate(USER_REGISTER), sanitise(), async (req, res,
 	}
 });
 
-app.post('/user/login', validate(USER_LOGIN), sanitise(), async (req, res, next) => {
+app.post('/user/login', validate(USER_LOGIN_SCHEMA), sanitise(), async (req, res, next) => {
 	const { username, passwordHash } = req.body;
 	try {
 		const token = await signIn(db, username, passwordHash);

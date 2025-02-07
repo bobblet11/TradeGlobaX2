@@ -399,30 +399,3 @@ export async function getAllCoinsWithLatestPriceInstance(db, query) {
 
 	return result;
 }
-
-export async function insertUser(db, user) {
-	const collection = db.collection("user");
-
-	user.password = bcrypt.hash(user.password, 10);
-	const existingUser = await collection.findOne({ key: user.username });
-	if (existingUser) {
-		throw new Error(`User with key ${user.username} already exists.`);
-	}
-
-	const result = await collection.insertOne(user);
-	return result;
-}
-
-export async function validateUser(db, user) {
-	const collection = db.collection("user");
-
-	const existingUser = await collection.findOne({
-		key: user.username,
-	});
-	if (!existingUser) {
-		throw new Error("User not found.");
-	}
-	if (!bcrypt.compare(user.password, existingUser.password)) {
-		throw new Error("Invalid password.");
-	}
-}

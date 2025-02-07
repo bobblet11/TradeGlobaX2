@@ -10,9 +10,9 @@ export class APIError extends Error {
 		this.method = method
 	}
 }
-      
+
 export class NetworkError extends Error {
-	constructor(message, url="N/A") {
+	constructor(message, url = "N/A") {
 		super(message);
 		this.name = "NetworkError";
 		this.url = url;
@@ -27,7 +27,7 @@ export class FileError extends Error {
 }
 
 export class DatabaseError extends Error {
-	constructor(message, operation="N/A", collection="N/A") {
+	constructor(message, operation = "N/A", collection = "N/A") {
 		super(message);
 		this.name = "Database Error";
 		this.operation = operation;
