@@ -27,9 +27,9 @@ import {
 	USER_LOGIN_SCHEMA
 } from './constants/schemas.js';
 import { signUp, signIn } from './auth/user.js';
-import { log, logError } from './logger.js';
+import { log, logError } from '../logger.js';
 import { verifyJWTToken } from './auth/token.js';
-import { AuthError } from './errorHandling.js';
+import { AuthError } from '../errorHandling.js';
 
 const app = express();
 const port = process.env.PORT;

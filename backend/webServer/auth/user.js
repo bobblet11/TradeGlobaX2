@@ -1,5 +1,5 @@
-import { AuthError, DatabaseError } from "../errorHandling.js";
-import { log } from "../logger.js";
+import { AuthError, DatabaseError } from "../../errorHandling.js";
+import { log } from "../../logger.js";
 import { generateJWTToken } from "./token.js";
 import { createHashedPassword, comparePassword } from "./password.js";
 

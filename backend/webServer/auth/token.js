@@ -1,7 +1,7 @@
-import { AuthError } from "../errorHandling.js";
+import { AuthError } from "../../errorHandling.js";
 const tokenHeaderKey = process.env.TOKEN_HEADER_KEY;
 import jwt from "jsonwebtoken"
-import { log } from "../logger.js";
+import { log } from "../../logger.js";
 
 export const generateJWTToken = (username) => {
 	const jwtSecretKey = process.env.JWT_SECRET_KEY;
