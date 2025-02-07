@@ -1,6 +1,6 @@
-import { fetchMetadata, fetchPriceInstanceData } from "./Adapter/coinMarketAPIFunctions.js";
+import { fetchMetadata, fetchPriceInstanceData } from "./Utils/coinMarketAPIFunctions.js";
 import { insertPriceInstances, putMetadatas } from "./databaseFunctions.js";
-import { log } from "./Utils/logger.js";
+import { log } from "../logger.js";
 
 const runAtStartOf = async () => {
 	log("Main", "Populating database with latest market data");

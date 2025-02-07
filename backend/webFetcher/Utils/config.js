@@ -1,11 +1,12 @@
 import dotenv from 'dotenv';
-import { readLineFromFile } from './Utils/fileUtils.js';
+import { readLineFromFile } from './fileUtils.js';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-dotenv.config(".env");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-if (!process.env.COINS_PATH || !process.env.ROOT_URL || !process.env.PORT || !process.env.CMC_API_KEY || !process.env.DB_API_KEY) {
-    throw new Error('Missing required environment variables. Please check your .env file.');
-}
+dotenv.config({ path: __dirname + '/.env' });
 
 //Request retry logic constants
 export const RETRY_LIMIT = 3;

@@ -1,5 +1,7 @@
 import * as manager from './manager.js'; // Ensure to add .js extension
 import { db } from '../server.js';
+import { AuthError } from '../../errorHandling.js';
+import { verifyJWTToken } from '../auth/token.js';
 
 export const authenticate = () => {
 	return async (req, res, next) => {
@@ -13,16 +15,16 @@ export const authenticate = () => {
 	};
 }
 
-const verifyToken = (req, res, next) => {
+export const verifyToken = (req, res, next) => {
 	const authHeader = req.headers['authorization'];
 	const token = authHeader && authHeader.split(' ')[1];
-    
+
 	if (!token) {
 		console.error(new AuthError("No token found in headers"))
-	    	return res.sendStatus(401);
+		return res.sendStatus(401);
 	}
 
-	if (!verifyJWTToken(token)){
+	if (!verifyJWTToken(token)) {
 		return res.sendStatus(403);
 	}
 

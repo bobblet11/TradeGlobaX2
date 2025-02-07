@@ -1,6 +1,6 @@
-import { processQueue } from "./Adapter/requestUtils.js";
-import { log } from "./Utils/logger.js";
-import { fetchMetadata } from "./Adapter/coinMarketAPIFunctions.js";
+import { processQueue } from "./Utils/requestUtils.js";
+import { log } from "../logger.js";
+import { fetchMetadata } from "./Utils/coinMarketAPIFunctions.js";
 
 export const insertPriceInstances = async (priceInstances) => {
 	const queue = [...priceInstances];

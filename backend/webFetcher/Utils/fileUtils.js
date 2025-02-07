@@ -1,7 +1,7 @@
-import { fetchMetadata } from "../Adapter/coinMarketAPIFunctions.js";
-import { COINS_PATH } from "../config.js";
-import { log, logError } from "./logger.js";
-import { FileError } from "../errorHandling.js";
+import { fetchMetadata } from "./coinMarketAPIFunctions.js";
+import { COINS_PATH } from "./config.js";
+import { log, logError } from "../../logger.js";
+import { FileError } from "../../errorHandling.js";
 import fs from 'fs';
 
 export const readLineFromFile = (filePath, lineNumber) => {

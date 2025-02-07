@@ -1,8 +1,8 @@
-import { COIN_IDS_TO_TRACK } from "../config.js";
-import { log } from "../Utils/logger.js";
-import { APIError } from "../errorHandling.js";
+import { COIN_IDS_TO_TRACK } from "./config.js";
+import { log } from "../../logger.js";
+import { APIError } from "../../errorHandling.js";
 import { withRetry } from "./requestUtils.js";
-import { MARKET_CAP_API_KEY } from "../config.js";
+import { MARKET_CAP_API_KEY } from "./config.js";
 
 function generatePriceInstanceDTOs(dataJson) {
 	if (!dataJson) return null;
