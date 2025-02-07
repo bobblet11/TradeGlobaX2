@@ -18,7 +18,7 @@ export const putMetadatas = async (metadatas) => {
 
 export const postMetadatas = async (metadatas) => {
 	const queue = [...metadatas];
-	const failures = await processQueue(queue, "PUT", "/coin/metadata");
+	const failures = await processQueue(queue, "POST", "/coin/metadata");
 	const successes = metadatas.length - failures;
 	log('Put Metadatas', `Final Requests success: ${successes}, Fail: ${failures}`)
 }

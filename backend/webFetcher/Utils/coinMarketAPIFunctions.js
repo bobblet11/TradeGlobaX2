@@ -36,7 +36,6 @@ export const fetchMetadata = () => {
 
 	return withRetry(
 		async () => {
-			console.log(`${MARKET_CAP_API_KEY}`)
 			const response = await fetch(`https://pro-api.coinmarketcap.com/v2/cryptocurrency/info?id=${COIN_IDS_TO_TRACK}`, {
 				method: "GET",
 				headers: { "X-CMC_PRO_API_KEY": MARKET_CAP_API_KEY },
