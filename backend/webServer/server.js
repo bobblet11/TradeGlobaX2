@@ -72,7 +72,7 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(helmet());
 app.use(makeString());
-// app.use(morgan('combined'));
+app.use(morgan('combined'));
 
 app.post('/*');
 app.put('/*', authenticate());
