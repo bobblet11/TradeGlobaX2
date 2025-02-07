@@ -34,3 +34,11 @@ export class DatabaseError extends Error {
 		this.collection = collection
 	}
 }
+
+export class AuthError extends Error {
+	constructor(message) {
+		super(message);
+		this.name = "Auth Error";
+	}
+}
+
