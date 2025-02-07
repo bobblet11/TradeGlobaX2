@@ -1,7 +1,7 @@
 import { AuthError } from "../../errorHandling.js";
 const tokenHeaderKey = process.env.TOKEN_HEADER_KEY;
 import jwt from "jsonwebtoken"
-import { log } from "../../logger.js";
+import { log, logError } from "../../logger.js";
 
 export const generateJWTToken = (username) => {
 	const jwtSecretKey = process.env.JWT_SECRET_KEY;
@@ -18,7 +18,7 @@ export const generateJWTToken = (username) => {
 		const token = jwt.sign(tokenData, jwtSecretKey);
 		return token
 	} catch (error) {
-		console.error(new AuthError(`Failed to generate JWT: ${error.message}`));
+		logError(new AuthError(`Failed to generate JWT: ${error.message}`));
 		return null;
 	}
 }
@@ -33,7 +33,7 @@ export const verifyJWTToken = (token) => {
 		log("verifyJWT", tokenData);
 		return tokenData;
 	} catch (error) {
-		console.error(new AuthError(`Failed to verify JWT: ${error.message}`));
+		logError(new AuthError(`Failed to verify JWT: ${error.message}`));
 		return null;
 
 	}

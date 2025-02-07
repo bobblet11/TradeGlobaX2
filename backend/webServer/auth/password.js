@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import { logError } from '../../logger.js';
 
 export const createHashedPassword =
     async (password) => {
@@ -10,7 +11,7 @@ export const createHashedPassword =
 
             return { hashedPassword, salt };
         } catch (error) {
-            console.error('Error generating salt or hashing password:', error);
+            logError(error);
             throw error; // Handle the error as needed
         }
     };
@@ -21,7 +22,7 @@ export const comparePassword =
             const match = await bcrypt.compare(password, hashedPassword);
             return match;
         } catch (error) {
-            console.error('Error comparing password:', error);
+            logError('Error comparing password:', error);
             throw error; // Handle the error as needed
         }
     };

@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { logError, log } from "../../logger.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -32,15 +33,31 @@ export async function connectDB() {
 		await client.connect();
 
 		await client.db("admin").command({ ping: 1 });
-		console.log("Successfully connected to MongoDB!");
+		log("Database Connection", "Successfully connected to MongoDB!");
 
 		db = client.db(DB_NAME);
 		return db;
 	} catch (error) {
-		console.error("Database connection failed:", error.message);
+		logError("Database connection failed:", error.message);
 		throw new Error("Database connection failed");
 	}
 }
+
+
+
+export async function authenticateKey(db, key) {
+	const collection = db.collection("user");
+
+	// Use a case-insensitive search if needed, or ensure `key` is sanitized
+	const user = await collection.findOne({ key });
+
+	if (!user) {
+		throw new Error("Cannot authenticate user");
+	}
+
+	return user; // Optionally return the user object if needed
+}
+
 
 export async function getPriceInstance(db, symbol, count) {
 	// Replace with your collection name
@@ -67,6 +84,7 @@ export async function getPriceInstance(db, symbol, count) {
 	return coin.priceInstances.reverse();
 }
 
+
 export async function getSpecificCoin(db, symbol) {
 	// Replace with your collection name
 	const collection = db.collection("coin");
@@ -90,6 +108,7 @@ export async function getSpecificCoin(db, symbol) {
 	}
 	return coin;
 }
+
 
 export async function getPriceInstanceRange(db, symbol, startDate, endDate) {
 	const collection = db.collection("coin");
@@ -150,18 +169,6 @@ export async function getPriceInstanceRange(db, symbol, startDate, endDate) {
 	return result[0].priceInstances.reverse();
 }
 
-export async function authenticateKey(db, key) {
-	const collection = db.collection("user");
-
-	// Use a case-insensitive search if needed, or ensure `key` is sanitized
-	const user = await collection.findOne({ key });
-
-	if (!user) {
-		throw new Error("Cannot authenticate user");
-	}
-
-	return user; // Optionally return the user object if needed
-}
 
 export async function getCoinMetadata(db, symbol) {
 	const collection = db.collection("coin");
@@ -178,6 +185,7 @@ export async function getCoinMetadata(db, symbol) {
 	return coin;
 }
 
+
 export async function insertCoin(db, coinMetadata) {
 	const collection = db.collection("coin");
 
@@ -191,6 +199,7 @@ export async function insertCoin(db, coinMetadata) {
 	const result = await collection.insertOne(coinMetadata);
 	return result;
 }
+
 
 export async function updateCoin(db, coinMetadata) {
 	const collection = db.collection("coin");
@@ -222,6 +231,7 @@ export async function updateCoin(db, coinMetadata) {
 		throw error;
 	}
 }
+
 
 export async function insertPriceInstance(db, coinPriceInstance) {
 	const collection = db.collection("coin");
@@ -314,6 +324,7 @@ export async function insertPriceInstance(db, coinPriceInstance) {
 		throw new Error(`Coin with symbol ${symbol} not found.`);
 	}
 }
+
 
 export async function getAllCoinsWithLatestPriceInstance(db, query) {
 	const collection = db.collection("coin");

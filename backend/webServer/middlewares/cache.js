@@ -1,42 +1,46 @@
+import { log } from "../../logger.js";
+
 export const cache = {}
 
-export const cacheCheck = () => {
+const cacheIsExpired = (cacheEntry)=>{
+	const now = new Date();
+	const timeOfCacheEntry = new Date(cacheEntry.timeOfEntry);
 
-	const cacheIsExpired = (cacheEntry)=>{
-		//since the fetcher adds new data every hour, need to check if the hour is different
-		const now = new Date();
-		const timeAdded = new Date(cacheEntry.timeAdded);
-		if (timeAdded.getDate() !== now.getDate()){
-			return true
-		}
-		if (now.getHours() !== timeAdded.getHours()){
-			return true
-		}
-		//date is same, and hour has not run over
-		return false
-
+	if (timeOfCacheEntry.getDate() !== now.getDate() || timeOfCacheEntry.getHours() !== now.getHours()){
+		return true
 	}
 
+	return false
+}
 
+
+export const cacheCheck = () => {
 	return async (req, res, next) => {
+
 		const cacheEntry = cache[req.baseUrl + req.path];
-		console.log(Object.keys(cache))
+
+		// No cache entry exists, proceed to the next middleware
 		if (cacheEntry === undefined) {
-		    console.log('Cache miss for:', req.baseUrl + req.path);
-		    return next(); // No cache entry, proceed to the next middleware
+		    log("Cache", `Cache miss for: ${req.baseUrl + req.path}`)
+		    return next(); 
 		}
 
+		// Cache entry is expired, proceed to the next middleware
 		if (cacheIsExpired(cacheEntry)) {
-		    console.log('Cache expired for:', req.baseUrl + req.path);
-		    return next(); // Cache is expired, proceed to the next middleware
+		    log("Cache", `Cache expired for: ${req.baseUrl + req.path}`)
+		    return next(); 
 		}
-	
-		return res.status(200).send(cacheEntry.data); // Serve cached data
-	    };
+		
+		// Cache exists and is valid. Skip over any Database queries.
+		return res.status(200).send(cacheEntry.data); 
+	};
 }
 
 export const updateCache = (req, dataToCache) => {
 	const now = new Date();
-	const cacheEntry = {'timeAdded':now.toISOString(), 'data':dataToCache};
+	const cacheEntry = {
+		'timeOfEntry' : now.toISOString(), 
+		'data' : dataToCache
+	};
 	cache[req.baseUrl + req.path] = cacheEntry;
 }

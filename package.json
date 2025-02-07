@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A full stack web project that displays real-time financial data for over 1,000 cryptocurrencies.",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "build1":"npm install --prefix backend/webFetcher/",
     "build2":"npm install --prefix backend/webServer/",

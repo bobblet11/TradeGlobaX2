@@ -1,3 +1,4 @@
+
 // Custom Error Types
 
 export class TemplateError extends Error {
@@ -80,14 +81,16 @@ export class DatabaseError extends TemplateError {
 }
 
 export class AuthError extends TemplateError {
-	constructor(message) {
+	constructor(message, statusCode=401) {
 		super(message);
 		this.name = "Auth Error";
+		this.statusCode=statusCode
 	}
 
 	print(timestamp) {
 		console.error('\n\n--- Auth Error Occurred ---');
 		console.error(`Timestamp: ${timestamp}`);
+		console.error(`Status Code: ${this.statusCode || 'N/A'}`);
 		console.error(`Message: ${this.message}`);
 		console.error(`Stack Trace: ${this.stack || 'N/A'}`);
 	}
