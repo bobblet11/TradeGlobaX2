@@ -1,19 +1,21 @@
 {
 	"version": 2,
 	"builds": [
-	  {
-	    "src": "/backend/webServer/server.js",
-	    "use": "@vercel/node"
-	  }
+		{
+			"src": "/backend/webServer/server.js",
+			"use": "@vercel/node"
+		}
 	],
 	"routes": [
-	  {
-	    "src": "/(.*)",
-	    "dest": "backend/webServer/server.js"
-	  }
+		{
+			"src": "/(.*)",
+			"dest": "/backend/webServer/server.js"
+		}
 	],
-	"crons": [{
-		"path": "/backend/webFetcher/cron",
-		"schedule": "0 0 * * *"
-	}]
+	"crons": [
+		{
+			"path": "/backend/webFetcher/cron.js",
+			"schedule": "0 0 * * *"
+		}
+	]
 }
