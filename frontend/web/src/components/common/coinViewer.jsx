@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useCoins } from '../../contexts/coinContext';
+import { useCoins } from '../../contexts/coinProvider';
 import Paginator from './paginator';
 import Table from './table';
 
@@ -50,9 +50,9 @@ export default function CoinViewer() {
 	};
 
 	return (   
-		<>
+		<div style={{backgroundColor: "#f0f0f0"}}>
 			<Table coins={coins.slice(start,end)} sortBy={sortBy} coinsPerPage={MAX_COINS_PER_PAGE} currentPage={currentPage}/>
 			<Paginator currentPage={currentPage} numberOfPages={numberOfPages} onPageChange={handlePageChange}/>
-		</>
+		</div>
 	);
 }

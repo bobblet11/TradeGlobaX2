@@ -65,5 +65,5 @@ export const COIN_PRICE_INSTANCE_SCHEMA = Joi.object({
 
 export const USER_LOGIN_SCHEMA = Joi.object({
   username: Joi.string().required(),
-  password: Joi.string().min(8).required(),
+  password: Joi.string().required(),
 });

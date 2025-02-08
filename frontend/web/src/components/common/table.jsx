@@ -1,5 +1,5 @@
 import "./table.css"
-import { useCoins } from '../../contexts/coinContext';
+import { useCoins } from '../../contexts/coinProvider';
 import TableRow from "./tableRow";
 
 export default function Table({coins, sortBy, currentPage, coinsPerPage}) {

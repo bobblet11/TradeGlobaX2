@@ -10,9 +10,9 @@ const router = express.Router();
 
 router.post('/register', validate(USER_LOGIN_SCHEMA), sanitise(), async (req, res, next) => {
 	//idk, add any other registration info here
-	const { username, passwordHash } = req.body;
+	const { username, password } = req.body;
 	try {
-		signUp(db, { username, passwordHash });
+		await signUp(db, username, password);
 		return res.status(200).end();
 	} catch (error) {
 		next(error);
@@ -21,10 +21,17 @@ router.post('/register', validate(USER_LOGIN_SCHEMA), sanitise(), async (req, re
 
 
 router.post('/login', validate(USER_LOGIN_SCHEMA), sanitise(), async (req, res, next) => {
-	const { username, passwordHash } = req.body;
+	const { username, password } = req.body;
 	try {
-		const token = await signIn(db, username, passwordHash);
-		return res.status(200).json(token);
+		const token = await signIn(db, username, password);
+		const data = {
+			"user":{
+				"username":username,
+				"token":token,
+			},
+			"token":token,
+		}
+		return res.status(200).json(data);
 	} catch (error) {
 		next(error);
 	}

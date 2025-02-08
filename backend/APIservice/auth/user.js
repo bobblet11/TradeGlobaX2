@@ -3,21 +3,21 @@ import { log } from "../../logger.js";
 import { generateJWTToken } from "./token.js";
 import { createHashedPassword, comparePassword } from "./password.js";
 
-export const signUp = async (db, user) => {
-	if (await userExists(db, user.username)) {
+export const signUp = async (db, username, password) => {
+	if (await userExists(db, username)) {
 		throw new DatabaseError("Cannot create new user because username already exists", "insertOne", "accounts");
 	}
 	const collection = db.collection("accounts");
 
 	try {
-		user.passwordHash = await createHashedPassword(user.passwordHash);
+		const hashPassword = await createHashedPassword(password);
+		const insert = {"username":username, "passwordHash":hashPassword.hashedPassword}
+		const createUserResult = await collection.insertOne(insert);
+		log("create user", `successfully created new user ${createUserResult}`);
 	}
 	catch (error) {
-		throw new DatabaseError("Cannot create new user because password hashing failed", "insertOne", "accounts");
+		throw new DatabaseError("Cannot create new user", "insertOne", "accounts");
 	}
-
-	const createUserResult = await collection.insertOne(user);
-	log("create user", `successfully created new user ${createUserResult}`);
 }
 
 export const deleteUser = async (db, username) => {
@@ -35,23 +35,21 @@ export const userExists = async (db, username) => {
 	return existingUser;
 }
 
-export const signIn = async (db, username, passwordHash) => {
-	const user = await userExists(db, username);
-	if (!user) {
+export const signIn = async (db, username, password) => {
+	const userInDb = await userExists(db, username);
+	if (!userInDb) {
 		throw new DatabaseError("Cannot signIn user because account does not exists", "signIn", "accounts");
 	}
 
-	try {
-		const match = await comparePassword(passwordHash, user.passwordHash);
-		if (!match) {
-			throw new AuthError("Password does not match!");
-		}
-
-		return generateJWTToken(username);
-	}
-	catch (error) {
-		throw new DatabaseError("Cannot signIn user because password hashing failed", "signIn", "accounts");
+	const match = await comparePassword(String(password), String(userInDb.passwordHash));
+	if (!match) {
+		throw new AuthError("Password does not match!");
 	}
 
+	const token = generateJWTToken(username);
+	if (!token){
+		throw new AuthError("Failed to generate token");
+	}
+	return token
 }
 

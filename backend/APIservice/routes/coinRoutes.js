@@ -3,6 +3,7 @@ import express from 'express';
 import * as manager from '../middlewares/manager.js';
 import { validate } from '../middlewares/validate.js';
 import { sanitise } from "../middlewares/sanitize.js";
+import { authenticateDbAccess } from "../middlewares/authentication.js";
 import {
     COIN_META_DATA_GET_SCHEMA,
     COIN_ALL_GET_SCHEMA,
@@ -15,6 +16,9 @@ import {
 import { db } from "../server.js";
 
 const router = express.Router();
+
+router.post('/*', authenticateDbAccess());
+router.put('/*', authenticateDbAccess());
 
 router.get('', validate(COIN_GET_SPECIFIC_SCHEMA), sanitise(), async (req, res, next) => {
 	const { symbol } = req.query;
