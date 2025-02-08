@@ -1,8 +1,8 @@
-backend/webServer/node_modules
+backend/APIservice/node_modules
 backend/webFetcher/node_modules
 backend/webScraper/node_modules
 .env
-backend/webServer/.env
+backend/APIservice/.env
 backend/webFetcher/.env
 frontend/node_modules
 /node_modules

@@ -3,7 +3,8 @@ import "./App.css"
 import HomePage from "./pages/home";
 import NotFoundPage from "./pages/notFound";
 import CoinPage from "./pages/coin";
-import LoginPage from "./pages/loginPage";
+import Login from "./pages/login";
+import Register from "./pages/register";
 import { CoinProvider } from './contexts/coinContext';
 import { AuthProvider } from './contexts/authContext'; // Import AuthProvider
 import SiteHeader from "./components/common/siteHeader";

@@ -14,7 +14,7 @@ const runAtStartOf = async () => {
 
 	if (priceInstances) {
 		await insertPriceInstances(priceInstances);
-	}
+	}	
 };
 
 
