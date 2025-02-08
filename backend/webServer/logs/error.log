@@ -1,0 +1,7 @@
+2025/02/06 15:48:26 [notice] 14968#23732: signal process started
+2025/02/06 15:48:26 [error] 14968#23732: OpenEvent("Global\ngx_quit_12516") failed (2: The system cannot find the file specified)
+2025/02/06 15:49:23 [notice] 24432#5876: signal process started
+2025/02/06 15:49:23 [error] 24432#5876: OpenEvent("Global\ngx_quit_12516") failed (2: The system cannot find the file specified)
+2025/02/06 15:52:52 [notice] 2076#23612: signal process started
+2025/02/06 15:54:23 [error] 7220#23524: *1 CreateFile() "C:\Dev\Projects\reposReact\tradeglobax_version3\backend\webServer_/html/favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost", referrer: "http://localhost/"
+2025/02/06 15:55:10 [notice] 9860#22560: signal process started
