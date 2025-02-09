@@ -6,3 +6,5 @@ backend/APIservice/.env
 backend/webFetcher/.env
 frontend/node_modules
 /node_modules
+config/.env
+frontend/web/.env
