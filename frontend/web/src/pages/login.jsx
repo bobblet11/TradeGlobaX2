@@ -27,7 +27,7 @@ export default function Login() {
             await logout();
             navigate('/login'); // Redirect to home page after successful login
         } catch (error) {
-            console.error('Failed to logout:', error);
+            console.error('Failed to logout :', error);
         }
     };
 

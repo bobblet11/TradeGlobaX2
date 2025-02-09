@@ -5,13 +5,15 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build1": "npm install --prefix backend/webFetcher/",
-    "build2": "npm install --prefix backend/webServer/",
-    "build3": "npm install --prefix frontend/web/",
-    "deploy1": "node backend/webServer/server.js",
-    "deploy2": "node backend/webFetcher/cron.js",
-    "build": "npm run build1 & npm run build2 & npm run build3",
-    "deploy": "npm run deploy2"
+    "buildFetcher": "node ./config/create_and_copy_env.cjs & npm install --prefix backend/webFetcher/",
+    "buildApiService": "node ./config/create_and_copy_env.cjs & npm install --prefix backend/APIservice/",
+    "buildWeb": "node ./config/create_and_copy_env.cjs & npm install --prefix frontend/web/",
+    "buildAll": " npm run buildFetcher & npm run buildApiService & npm run buildWeb",
+
+    "deployApiService": "node backend/APIservice/server.js",
+    "deployFetcher": "node backend/webFetcher/cron.js",
+    "deplyWebsite" : "npm run dev --prefix frontend/web/",
+    "deployAll": "npm run deployFetcher & npm run deployApiService & npm run deplyWebsite"
   },
   "author": "",
   "license": "ISC",

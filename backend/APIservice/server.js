@@ -13,14 +13,14 @@ import * as manager from './middlewares/manager.js';
 import coinRoutes from './routes/coinRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import generalRoutes from './routes/generalRoutes.js'
-
+import { PORT } from './config.js';
 
 const connectToDatabase = async () => {
 	try {
 		db = await manager.connectDB();
 		app.locals.db = db;
-		app.listen(port, () => {
-			log('Database Connection', `Server is running on localhost:${port}`);
+		app.listen(PORT, () => {
+			log('Database Connection', `Server is running on localhost:${PORT}`);
 		});
 	} catch (error) {
 		logError(error);
@@ -32,8 +32,6 @@ const connectToDatabase = async () => {
 export const app = express();
 export let db;
 connectToDatabase();
-
-const port = process.env.PORT;
 
 
 const corsOptions = {

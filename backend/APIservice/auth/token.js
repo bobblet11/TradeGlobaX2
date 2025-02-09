@@ -1,10 +1,10 @@
 import { AuthError } from "../../errorHandling.js";
-const tokenHeaderKey = process.env.TOKEN_HEADER_KEY;
+import { TOKEN_HEADER_KEY, JWT_SECRET_KEY } from "../config.js";
 import jwt from "jsonwebtoken"
 import { log, logError } from "../../logger.js";
 
 export const generateJWTToken = (username) => {
-	const jwtSecretKey = process.env.JWT_SECRET_KEY;
+	const jwtSecretKey = JWT_SECRET_KEY;
 	const now = Math.floor(Date.now() / 1000);
 	const expiration = now + (24 * 60 * 60);
 
@@ -23,11 +23,10 @@ export const generateJWTToken = (username) => {
 	}
 }
 
-//const tokenHeaderKey = process.env.TOKEN_HEADER_KEY;
-//req.header(tokenHeaderKey)
+
 
 export const verifyJWTToken = (token) => {
-	const jwtSecretKey = process.env.JWT_SECRET_KEY;
+	const jwtSecretKey = JWT_SECRET_KEY;
 	try {
 		const tokenData = jwt.verify(token, jwtSecretKey);
 		log("verifyJWT", tokenData);

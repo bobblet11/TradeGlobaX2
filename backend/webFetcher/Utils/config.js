@@ -5,8 +5,8 @@ import { dirname } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-dotenv.config({ path: __dirname + '/.env' });
+const __root = `${__dirname}/../../..`
+dotenv.config({ path: `${__root}/config/.env` });
 
 //Request retry logic constants
 export const RETRY_LIMIT = 3;
@@ -16,7 +16,7 @@ export const RETRY_DELAY = 1000;
 export const CONN_BATCH_SIZE = 100;
 
 //Path to list of coins ids to track
-export const COINS_PATH = process.env.COINS_PATH;
+export const COINS_PATH = `${__dirname}/${process.env.COINS_PATH}`;
 export const COIN_IDS_TO_TRACK = readLineFromFile(COINS_PATH, 1);
 
 export const ROOT_URL = process.env.ROOT_URL

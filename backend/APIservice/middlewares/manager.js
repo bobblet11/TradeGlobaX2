@@ -4,19 +4,18 @@ import dotenv from "dotenv";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { logError, log } from "../../logger.js";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import {USER, PASSWORD, DB_NAME, CLUSTER_ID} from '../config.js'
 
-dotenv.config({ path: __dirname + '/.env' });
-const USER = process.env.DB_USER;
-const PASSWORD = process.env.DB_PASSWORD;
-const DB_NAME = process.env.DB_NAME;
 const uri =
 	"mongodb+srv://" +
 	USER +
 	":" +
 	PASSWORD +
-	"@cluster0.mpisr9t.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+	"@"
+	+
+	CLUSTER_ID
+	+
+	".mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
