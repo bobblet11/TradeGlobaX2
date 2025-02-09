@@ -17,12 +17,10 @@
   border-radius: 4px; /* Rounded corners */
   transition: background-color 0.3s, color 0.3s; /* Smooth transition */
   font-weight: 600  ;
+  margin: auto;
 }
 
-.table-header button:hover {
-  background-color: #0011ff; /* Darker green on hover */
-  color:rgb(255, 255, 255);
-}
+
 
 .table-header button:focus {
   outline: none; /* Remove outline on focus */

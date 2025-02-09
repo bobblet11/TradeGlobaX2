@@ -51,21 +51,6 @@
   margin-bottom: -0.4rem; /* Consider removing or adjusting this */
 }
 
-.foreground > form > button {
-  margin-top: 2rem;
-  padding: 1.2rem; /* Adjusted padding for consistency */
-  border-radius: 5px; /* Consistent border radius */
-  border: none;
-  background-color: #007bff; /* Primary button color */
-  color: white; /* Text color for button */
-  cursor: pointer; /* Pointer cursor for button */
-  transition: background-color 0.3s; /* Smooth background transition */
-}
-
-.foreground > form > button:hover {
-  background-color: #0056b3; /* Darker shade on hover */
-}
-
 .foreground > div:last-child {
   margin-top: auto;
   font-size: 0.9rem;

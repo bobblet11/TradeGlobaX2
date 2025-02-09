@@ -1,10 +1,11 @@
 import { useAuth } from '../contexts/authProvider';
-import { useNavigate } from 'react-router-dom';
 import "./loginRegister.css";
+import { useNavigation } from '../contexts/navProvider';
 
 export default function Register() {
     const { register } = useAuth();
-    const navigate = useNavigate(); // Use navigate for redirection if needed
+    const {navigate} = useNavigation();
+    
 
     const submitRegister = async (event) => {
         event.preventDefault(); // Prevent page refresh

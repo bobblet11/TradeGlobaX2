@@ -5,13 +5,13 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build1":"npm install --prefix backend/webFetcher/",
-    "build2":"npm install --prefix backend/webServer/",
-    "build3":"npm install --prefix frontend/web/",
-    "deploy1":"node backend/webServer/server.js",
-    "deploy2":"node backend/webFetcher/cron.js",
-    "build":"npm run build1 & npm run build2 & npm run build3",
-    "deploy":"npm run deploy2"
+    "build1": "npm install --prefix backend/webFetcher/",
+    "build2": "npm install --prefix backend/webServer/",
+    "build3": "npm install --prefix frontend/web/",
+    "deploy1": "node backend/webServer/server.js",
+    "deploy2": "node backend/webFetcher/cron.js",
+    "build": "npm run build1 & npm run build2 & npm run build3",
+    "deploy": "npm run deploy2"
   },
   "author": "",
   "license": "ISC",
