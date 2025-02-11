@@ -2,6 +2,17 @@
 
 ## Project Description
 A full-stack web project that displays real-time financial data for over 1,000 cryptocurrencies. Cryptocurrency data is scraped from various APIs every hour, processed, and stored in a MongoDB cloud cluster. Backend is hosted on Render.io's cloud-based hosting service.
+
+## Screenshots
+
+### Home Screen
+![Home Screen](githubDecorations/home.jpg)
+
+### Feature 1
+![Feature 1](githubDecorations/BTC.jpg)
+
+### Feature 2
+![Feature 2](githubDecorations/BTC(1).jpg)
   
 ## Current Features
 - Scrapes real-time cryptocurrency data at hour intervals
