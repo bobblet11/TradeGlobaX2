@@ -5,13 +5,13 @@ A full-stack web project that displays real-time financial data for over 1,000 c
 
 ## Screenshots
 
-### Home Screen
+### Home Page
 ![Home Screen](githubDecorations/home.jpg)
 
-### Feature 1
+### BTC Daily Chart
 ![Feature 1](githubDecorations/BTC.jpg)
 
-### Feature 2
+### BTC Max Chart
 ![Feature 2](githubDecorations/BTC(1).jpg)
   
 ## Current Features
