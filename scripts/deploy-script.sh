@@ -10,6 +10,7 @@ cd ./TradeGlobaX2/ || exit
 
 # Pull the latest code from the repository
 echo "Pulling latest code from repository..."
+git config pull.rebase false
 git fetch
 git pull origin master
 
