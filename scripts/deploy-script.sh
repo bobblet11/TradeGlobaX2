@@ -6,7 +6,7 @@ pm2 stop server.js || true
 pm2 stop cron.js || true
 
 # Navigate to the project directory (modify this path as needed)
-cd /TradeGlobaX2/ || exit
+cd ./TradeGlobaX2/ || exit
 
 # Pull the latest code from the repository
 echo "Pulling latest code from repository..."
