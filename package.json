@@ -10,12 +10,12 @@
     "installFetcher": "npm install --prefix backend/webFetcher/",
     "installApiService": "npm install --prefix backend/APIservice/",
     "installWeb": "npm install --prefix frontend/web/",
-    "installAll": " npm run installFetcher & npm run installApiService & npm run installWeb & npm install",
+    "installAll": " npm run installFetcher && npm run installApiService && npm run installWeb && npm install",
     "buildWeb": "npm run build --prefix frontend/web/",
     "deployApiService": "node backend/APIservice/server.js",
     "deployFetcher": "node backend/webFetcher/cron.js",
     "deplyWebsite": "npm run dev --prefix frontend/web/",
-    "deployAll": "npm run deployFetcher & npm run deployApiService & npm run deplyWebsite"
+    "deployAll": "npm run deployFetcher && npm run deployApiService && npm run deplyWebsite"
   },
   "author": "",
   "license": "ISC",
