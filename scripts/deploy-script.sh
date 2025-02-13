@@ -10,7 +10,8 @@ cd ./TradeGlobaX2/ || exit
 
 # Pull the latest code from the repository
 echo "Pulling latest code from repository..."
-git pull origin main
+git fetch
+git pull origin master
 
 # Install dependencies and build the project
 echo "Installing dependencies..."
