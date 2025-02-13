@@ -19,7 +19,7 @@ npm run buildWeb
 
 # Start the PM2 processes
 echo "Starting PM2 processes..."
-pm2 start server.js
-pm2 start cron.js
+pm2 start ./backend/APIservice/server.js
+pm2 start ./backend/webFetcher/cron.js
 
 echo "Deployment completed successfully!"
