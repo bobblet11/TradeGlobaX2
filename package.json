@@ -5,18 +5,21 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "buildFetcher": "node ./config/create_and_copy_env.cjs & npm install --prefix backend/webFetcher/",
-    "buildApiService": "node ./config/create_and_copy_env.cjs & npm install --prefix backend/APIservice/",
-    "buildWeb": "node ./config/create_and_copy_env.cjs & npm install --prefix frontend/web/",
-    "buildAll": " npm run buildFetcher & npm run buildApiService & npm run buildWeb",
-
+    "test": "mocha",
+    "installFetcher": "node ./config/create_and_copy_env.cjs & npm install --prefix backend/webFetcher/",
+    "installApiService": "node ./config/create_and_copy_env.cjs & npm install --prefix backend/APIservice/",
+    "installWeb": "node ./config/create_and_copy_env.cjs & npm install --prefix frontend/web/ & npm run lint --prefix frontend/web/",
+    "installAll": " npm run installFetcher & npm run installApiService & npm run installWeb",
+    "buildWeb": "npm run build --prefix frontend/web/",
     "deployApiService": "node backend/APIservice/server.js",
     "deployFetcher": "node backend/webFetcher/cron.js",
-    "deplyWebsite" : "npm run dev --prefix frontend/web/",
+    "deplyWebsite": "npm run dev --prefix frontend/web/",
     "deployAll": "npm run deployFetcher & npm run deployApiService & npm run deplyWebsite"
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
+  "devDependencies": {
+    "chai": "^5.1.2",
+    "mocha": "^11.1.0"
   }
 }
