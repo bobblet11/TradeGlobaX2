@@ -2,8 +2,8 @@
 
 # Stop the PM2 daemon processes
 echo "Stopping PM2 processes..."
-pm2 stop server.js || true
-pm2 stop cron.js || true
+pm2 stop server || true
+pm2 stop cron || true
 
 # Navigate to the project directory (modify this path as needed)
 cd ./TradeGlobaX2/ || exit
