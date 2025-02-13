@@ -10,7 +10,7 @@
     "installFetcher": "npm install --prefix backend/webFetcher/",
     "installApiService": "npm install --prefix backend/APIservice/",
     "installWeb": "npm install --prefix frontend/web/",
-    "installAll": " npm run installFetcher & npm run installApiService & npm run installWeb",
+    "installAll": " npm run installFetcher & npm run installApiService & npm run installWeb & npm install",
     "buildWeb": "npm run build --prefix frontend/web/",
     "deployApiService": "node backend/APIservice/server.js",
     "deployFetcher": "node backend/webFetcher/cron.js",
