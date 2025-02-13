@@ -9,7 +9,7 @@
     "setupEnv":"node ./config/create_and_copy_env.cjs",
     "installFetcher": "npm install --prefix backend/webFetcher/",
     "installApiService": "node npm install --prefix backend/APIservice/",
-    "installWeb": "node npm install --prefix frontend/web/ & npm run lint --prefix frontend/web/",
+    "installWeb": "node npm install --prefix frontend/web/",
     "installAll": " npm run installFetcher & npm run installApiService & npm run installWeb",
     "buildWeb": "npm run build --prefix frontend/web/",
     "deployApiService": "node backend/APIservice/server.js",
