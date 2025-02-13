@@ -6,9 +6,10 @@
   "type": "module",
   "scripts": {
     "test": "mocha",
-    "installFetcher": "node ./config/create_and_copy_env.cjs & npm install --prefix backend/webFetcher/",
-    "installApiService": "node ./config/create_and_copy_env.cjs & npm install --prefix backend/APIservice/",
-    "installWeb": "node ./config/create_and_copy_env.cjs & npm install --prefix frontend/web/ & npm run lint --prefix frontend/web/",
+    "setupEnv":"node ./config/create_and_copy_env.cjs",
+    "installFetcher": "npm install --prefix backend/webFetcher/",
+    "installApiService": "node npm install --prefix backend/APIservice/",
+    "installWeb": "node npm install --prefix frontend/web/ & npm run lint --prefix frontend/web/",
     "installAll": " npm run installFetcher & npm run installApiService & npm run installWeb",
     "buildWeb": "npm run build --prefix frontend/web/",
     "deployApiService": "node backend/APIservice/server.js",
